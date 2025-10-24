@@ -1,11 +1,9 @@
-// File: app/control/page.tsx
-("use client");
-import { useEffect, useState } from "react";
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Shell from "@/components/draw/Shell";
 import ProgramInfo from "@/components/draw/ProgramInfo";
 import WinnersTicker from "@/components/draw/WinnersTicker";
-import SpinWheel from "@/components/draw/SpinWheel";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,31 +13,92 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Crown, Keyboard, Settings, Shuffle, Users } from "lucide-react";
-import FlipNumbers from "react-flip-numbers";
+import { Users } from "lucide-react";
 import confetti from "canvas-confetti";
-import { DEMO_PROGRAMS, THEMES, tierBadge } from "@/lib/type";
+import { DEMO_PROGRAMS, THEMES } from "@/lib/type";
 import { useDrawStore } from "@/lib/store";
-import { isSpecial, numberMask } from "@/lib/utils";
+import { isSpecial } from "@/lib/utils";
+import { ParticipantsTable } from "./components/participants-table";
+import { DigitSelects } from "./components/digit-selects";
+
+type Participant = { id: string; name?: string; phone: string; count: number };
+
+function CagePreview({ value, size = 40 }: { value: string; size?: number }) {
+  const digits = useMemo(
+    () => Array.from({ length: 5 }, (_, i) => value[i] ?? "–"),
+    [value]
+  );
+  return (
+    <div className="rounded-xl border bg-neutral-50/60 p-3">
+      <div className="text-[11px] text-neutral-500 mb-2">Xem trước</div>
+      <div className="flex items-center gap-2">
+        {digits.map((d, i) => (
+          <div
+            key={i}
+            className="grid place-items-center rounded-lg border bg-white text-base font-semibold tabular-nums"
+            style={{ width: size, height: size }}
+          >
+            {d}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SummaryCard({
+  title,
+  display,
+  history,
+}: {
+  title?: string;
+  display: string;
+  history: string[];
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Tóm tắt</CardTitle>
+        <CardDescription className="text-sm truncate">{title}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between rounded-xl border p-3">
+          <span className="text-sm text-neutral-600">Đang hiển thị</span>
+          <span
+            className={`text-lg tabular-nums font-extrabold ${
+              isSpecial(display) ? "text-amber-600" : "text-neutral-900"
+            }`}
+          >
+            {display || "—"}
+          </span>
+        </div>
+        <div className="space-y-2">
+          <div className="text-sm font-medium">Lịch sử gần nhất</div>
+          <div className="flex flex-wrap gap-1.5">
+            {history.length ? (
+              history.map((n, i) => (
+                <span
+                  key={i}
+                  className={`px-2 py-1 rounded-lg border text-xs tabular-nums ${
+                    isSpecial(n)
+                      ? "bg-amber-50 border-amber-200 text-amber-800"
+                      : "bg-neutral-50 border-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {n}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-muted-foreground">Chưa có</span>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function ControlPage() {
   const programId = useDrawStore((s) => s.programId);
@@ -48,41 +107,38 @@ export default function ControlPage() {
   const isCage = program?.type === "cage";
 
   const prizes = useDrawStore((s) => s.prizes);
-  const participants = useDrawStore((s) => s.participants);
+  const participants = useDrawStore((s) => s.participants) as Participant[];
   const winners = useDrawStore((s) => s.winners);
-  const addPrize = useDrawStore((s) => s.addPrize);
-  const removePrize = useDrawStore((s) => s.removePrize);
-  const addParticipant = useDrawStore((s) => s.addParticipant);
   const drawByRandom = useDrawStore((s) => s.drawByRandom);
-  const wheelStopAt = useDrawStore((s) => s.wheelStopAt);
+  const showCage = useDrawStore((s) => s.showCage);
+  const showHistoryCage = useDrawStore((s) => s.showHistoryCage);
   const cageDisplay = useDrawStore((s) => s.cageDisplay);
   const cageHistory = useDrawStore((s) => s.cageHistory);
-  const showCage = useDrawStore((s) => s.showCage);
   const resetCage = useDrawStore((s) => s.resetCage);
 
-  const [newPrize, setNewPrize] = useState({
-    label: "",
-    count: 1,
-    tier: "C" as const,
-    image: "",
-  });
-  const [pName, setPName] = useState("");
-  const [pPhone, setPPhone] = useState("");
+  const [cage, setCage] = useState("");
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!isCage) {
-        if (e.code === "Space") {
-          e.preventDefault();
-          const result = drawByRandom();
-          if (result)
-            confetti({ particleCount: 180, spread: 95, origin: { y: 0.28 } });
-        }
+      if (isCage) return;
+      if (e.code === "Space") {
+        e.preventDefault();
+        const result = drawByRandom();
+        if (result)
+          confetti({ particleCount: 180, spread: 95, origin: { y: 0.28 } });
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isCage, drawByRandom]);
+
+  const handleShowCage = useCallback(() => {
+    if (!cage) return;
+    const normalized = cage.replace(/\D/g, "").padStart(5, "0").slice(-5);
+    showCage(normalized);
+    showHistoryCage(normalized);
+    setCage("");
+  }, [cage, showCage]);
 
   return (
     <Shell>
@@ -93,7 +149,7 @@ export default function ControlPage() {
           <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
               <CardTitle className="text-3xl">
-                {isCage ? "Lồng cầu" : "Quay online"}
+                {isCage ? "Lồng cầu" : "Chọn số Online"}
               </CardTitle>
               <CardDescription>
                 {isCage
@@ -101,481 +157,373 @@ export default function ControlPage() {
                   : "Control quay số; Audience xem ticker và danh sách trúng."}
               </CardDescription>
             </div>
-
-            {!isCage && (
-              <div className="flex items-center gap-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Cấu hình giải
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[760px]">
-                    <DialogHeader>
-                      <DialogTitle>Giải thưởng</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4">
-                      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
-                        <div className="md:col-span-3">
-                          <Label>Tên giải</Label>
-                          <Input
-                            value={newPrize.label}
-                            onChange={(e) =>
-                              setNewPrize((p) => ({
-                                ...p,
-                                label: e.target.value,
-                              }))
-                            }
-                            placeholder="VD: Giải Nhất"
-                          />
-                        </div>
-                        <div>
-                          <Label>Số lượng</Label>
-                          <Input
-                            type="number"
-                            min={1}
-                            value={newPrize.count}
-                            onChange={(e) =>
-                              setNewPrize((p) => ({
-                                ...p,
-                                count: Number(e.target.value || 1),
-                              }))
-                            }
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <Label>Ảnh (URL)</Label>
-                          <Input
-                            value={newPrize.image}
-                            onChange={(e) =>
-                              setNewPrize((p) => ({
-                                ...p,
-                                image: e.target.value,
-                              }))
-                            }
-                            placeholder="https://..."
-                          />
-                        </div>
-                        <div>
-                          <Label>Cấp</Label>
-                          <Select
-                            value={newPrize.tier}
-                            onValueChange={(v) =>
-                              setNewPrize((p) => ({ ...p, tier: v as any }))
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="S">S</SelectItem>
-                              <SelectItem value="A">A</SelectItem>
-                              <SelectItem value="B">B</SelectItem>
-                              <SelectItem value="C">C</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex items-end">
-                          <Button
-                            onClick={() => {
-                              if (!newPrize.label.trim() || newPrize.count <= 0)
-                                return;
-                              addPrize({
-                                label: newPrize.label.trim(),
-                                count: Math.floor(newPrize.count),
-                                tier: newPrize.tier,
-                                image: newPrize.image || undefined,
-                              });
-                              setNewPrize({
-                                label: "",
-                                count: 1,
-                                tier: "C",
-                                image: "",
-                              });
-                            }}
-                          >
-                            Thêm
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {prizes.map((pr) => (
-                          <Card
-                            key={pr.id}
-                            className="hover:shadow-md transition-shadow"
-                          >
-                            <CardHeader className="pb-2">
-                              <div className="flex items-center justify-between">
-                                <CardTitle className="text-base">
-                                  {pr.label}
-                                </CardTitle>
-                                <Badge className={tierBadge[pr.tier ?? "C"]}>
-                                  x{pr.count}
-                                </Badge>
-                              </div>
-                            </CardHeader>
-                            {pr.image && (
-                              <CardContent className="pt-0">
-                                <img
-                                  src={pr.image}
-                                  alt={pr.label}
-                                  className="h-28 w-full object-cover rounded-md"
-                                />
-                              </CardContent>
-                            )}
-                            <CardFooter>
-                              <Button
-                                variant="ghost"
-                                className="w-full"
-                                onClick={() => removePrize(pr.id)}
-                              >
-                                Xóa
-                              </Button>
-                            </CardFooter>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="secondary">Lưu</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-
-                <Button
-                  onClick={() => {
-                    const res = drawByRandom();
-                    if (res)
-                      confetti({
-                        particleCount: 180,
-                        spread: 95,
-                        origin: { y: 0.28 },
-                      });
-                  }}
-                  disabled={!participants.length || !prizes.length}
-                >
-                  <Shuffle className="h-4 w-4 mr-2" />
-                  Quay số
-                </Button>
-              </div>
-            )}
           </CardHeader>
 
           <CardContent>
             {isCage ? (
               <div className="grid xl:grid-cols-3 gap-6">
-                <Card className="xl:col-span-2">
-                  <CardHeader>
-                    <CardTitle>Nhập số lồng cầu</CardTitle>
-                    <CardDescription>
-                      Nhập số và bấm “Hiển thị”.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <div className="md:col-span-2">
-                        <Label>Số</Label>
-                        <Input
-                          onKeyDown={(e) => {}}
-                          value={cageDisplay}
-                          readOnly
-                          placeholder="Đang hiển thị"
+                <Card className="xl:col-span-2 overflow-hidden">
+                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b">
+                    <CardHeader className="py-6">
+                      <CardTitle className="text-lg">
+                        Nhập số lồng cầu
+                      </CardTitle>
+                      <CardDescription>
+                        Nhập số và bấm “Hiển thị”.
+                      </CardDescription>
+                    </CardHeader>
+                  </div>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-end gap-4">
+                      <div className="w-full space-y-4">
+                        <DigitSelects
+                          value={cage}
+                          onChange={setCage}
+                          onConfirmDigit={(idx, val, next) => {
+                            // hiển thị từng bước (Audience sẽ thấy dần)
+                            showCage(next);
+                          }}
+                          onConfirmFull={(full) => {
+                            // chỉ hiển thị khi đủ 5 số
+                            showCage(full);
+                          }}
+                          confirmPerDigit // hoặc false nếu muốn chỉ confirm khi đủ 5 số
                         />
+                        <div className="text-xs text-neutral-500">
+                          Dùng Tab để chuyển nhanh giữa các ô.
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleShowCage}
+                        className="h-11 px-6 rounded-xl shadow-sm text-white font-medium transition-all hover:shadow md:self-end"
+                      >
+                        Lưu
+                      </Button>
+                    </div>
+                    <div className="rounded-xl border bg-gradient-to-br from-neutral-50 to-white p-3 md:p-4">
+                      <div className="text-xs text-neutral-500 mb-2">
+                        Xem trước
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {Array.from(
+                          { length: 5 },
+                          (_, i) => cage[i] ?? "–"
+                        ).map((d, i) => {
+                          const active = d !== "–";
+                          return (
+                            <div
+                              key={i}
+                              className={`h-10 w-10 md:h-12 md:w-12 grid place-items-center rounded-xl border text-lg md:text-xl font-semibold ${
+                                active
+                                  ? "bg-white shadow-sm"
+                                  : "bg-neutral-50 text-neutral-400"
+                              }`}
+                            >
+                              {d}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Tóm tắt</CardTitle>
-                    <CardDescription>{program?.title}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span>Đang hiển thị</span>
+                <Card className="overflow-hidden">
+                  <div className="bg-gradient-to-r from-neutral-50 to-white border-b">
+                    <CardHeader className="py-6">
+                      <CardTitle className="text-lg">Tóm tắt</CardTitle>
+                      <CardDescription className="truncate">
+                        {program?.title}
+                      </CardDescription>
+                    </CardHeader>
+                  </div>
+                  <CardContent className="space-y-4 text-sm">
+                    <div className="flex items-center justify-between rounded-xl border bg-white p-3">
+                      <span className="text-neutral-600">Đang hiển thị</span>
                       <span
-                        className={`font-extrabold ${
-                          isSpecial(cageDisplay) ? "text-amber-600" : ""
+                        className={`tabular-nums tracking-wider text-base md:text-lg font-extrabold ${
+                          isSpecial(cageDisplay)
+                            ? "text-amber-600"
+                            : "text-neutral-900"
                         }`}
                       >
                         {cageDisplay || "—"}
                       </span>
                     </div>
-                    <Separator />
-                    <div className="font-medium">Lịch sử gần nhất</div>
-                    <div className="flex flex-wrap gap-2">
-                      {cageHistory.length ? (
-                        cageHistory.map((n, i) => (
-                          <span
-                            key={i}
-                            className={`px-2 py-1 rounded border ${
-                              isSpecial(n)
-                                ? "bg-amber-50 border-amber-300 text-amber-800"
-                                : "bg-muted/50"
-                            }`}
-                          >
-                            {n}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-muted-foreground">Chưa có</span>
-                      )}
+                    <div className="space-y-2">
+                      <div className="font-medium">Lịch sử gần nhất</div>
+                      <div className="flex flex-wrap gap-2">
+                        {cageHistory.length ? (
+                          cageHistory.map((n, i) => (
+                            <span
+                              key={i}
+                              className={`px-2.5 py-1.5 rounded-lg border text-xs md:text-sm tabular-nums ${
+                                isSpecial(n)
+                                  ? "bg-amber-50 border-amber-200 text-amber-800"
+                                  : "bg-neutral-50 border-neutral-200 text-neutral-700"
+                              }`}
+                            >
+                              {n}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-muted-foreground">Chưa có</span>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                   <CardFooter className="gap-2">
-                    <Button variant="secondary" onClick={resetCage}>
+                    <Button
+                      variant="secondary"
+                      onClick={resetCage}
+                      className="rounded-xl"
+                    >
                       Làm mới
                     </Button>
                   </CardFooter>
                 </Card>
               </div>
             ) : (
-              <>
-                <Tabs defaultValue="participants" className="w-full">
-                  <TabsList>
-                    <TabsTrigger
-                      value="participants"
-                      className="flex items-center gap-2"
-                    >
-                      <Users className="h-4 w-4" />
-                      Người tham gia
-                    </TabsTrigger>
-                    <TabsTrigger value="stage">Màn quay</TabsTrigger>
-                    <TabsTrigger value="winners">Danh sách trúng</TabsTrigger>
-                  </TabsList>
+              <Tabs defaultValue="participants" className="w-full">
+                <TabsList>
+                  <TabsTrigger
+                    value="participants"
+                    className="flex items-center gap-2"
+                  >
+                    <Users className="h-4 w-4" />
+                    Người tham gia
+                  </TabsTrigger>
+                  <TabsTrigger value="stage">Màn quay</TabsTrigger>
+                  <TabsTrigger value="winners">Danh sách trúng</TabsTrigger>
+                </TabsList>
 
-                  <TabsContent value="participants" className="mt-4">
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div className="md:col-span-2">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                          <div>
-                            <Label>Họ tên</Label>
-                            <Input
-                              value={pName}
-                              onChange={(e) => setPName(e.target.value)}
-                              placeholder="Tuỳ chọn"
-                            />
-                          </div>
-                          <div>
-                            <Label>Số điện thoại</Label>
-                            <Input
-                              value={pPhone}
-                              onChange={(e) => setPPhone(e.target.value)}
-                              placeholder="09xxxxxxxx"
-                            />
-                          </div>
-                          <div>
-                            <Label>Số lượt quay</Label>
-                            <Input type="number" defaultValue={1} min={1} />
-                          </div>
-                          <div className="flex items-end">
-                            <Button
-                              className="w-full"
-                              onClick={() => {
-                                const phone = numberMask(pPhone);
-                                if (!phone) return;
-                                addParticipant({
-                                  name: pName || undefined,
-                                  phone,
-                                  count: 1,
-                                });
-                                setPName("");
-                                setPPhone("");
-                              }}
-                            >
-                              Thêm
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="mt-4 border rounded-xl overflow-hidden bg-card/50">
-                          <div className="max-h-80 overflow-auto">
-                            <table className="w-full text-sm">
-                              <thead className="sticky top-0 bg-muted/80 backdrop-blur">
-                                <tr>
-                                  <th className="text-left p-3 w-12">#</th>
-                                  <th className="text-left p-3">Họ tên</th>
-                                  <th className="text-left p-3">SĐT</th>
-                                  <th className="text-left p-3">
-                                    Số lượt quay
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {participants.map((p, idx) => (
-                                  <tr key={p.id} className="border-t">
-                                    <td className="p-3">{idx + 1}</td>
-                                    <td className="p-3">{p.name ?? "—"}</td>
-                                    <td className="p-3 font-mono">{p.phone}</td>
-                                    <td className="p-3">{p.count}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <Card className="bg-card/60">
-                          <CardHeader>
-                            <CardTitle className="text-base">Tóm tắt</CardTitle>
-                            <CardDescription>{program?.title}</CardDescription>
-                          </CardHeader>
-                          <CardContent className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span>Người tham gia</span>
-                              <span className="font-semibold">
-                                {participants.length}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Tổng giải</span>
-                              <span className="font-semibold">
-                                {prizes.reduce((a, b) => a + b.count, 0)}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Đã trúng</span>
-                              <span className="font-semibold">
-                                {winners.length}
-                              </span>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="stage" className="mt-4">
-                    <div className="grid lg:grid-cols-2 gap-6">
-                      <Card className="overflow-hidden">
-                        <CardHeader>
-                          <CardTitle>Spin Wheel</CardTitle>
-                          <CardDescription>
-                            Vòng quay theo số lượng giải
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <SpinWheel
-                            segments={prizes}
-                            onStop={(i) => {
-                              const res = wheelStopAt(i);
-                              if (res)
-                                confetti({
-                                  particleCount: 160,
-                                  spread: 80,
-                                  origin: { y: 0.28 },
-                                });
-                            }}
-                          />
-                        </CardContent>
-                      </Card>
-                      <Card className="overflow-hidden">
-                        <CardHeader>
-                          <CardTitle>Random số</CardTitle>
-                          <CardDescription>
-                            Chọn ngẫu nhiên từ người tham gia
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex flex-col items-center gap-6">
-                            <FlipNumbers
-                              height={40}
-                              width={40}
-                              color="black"
-                              background="white"
-                              play
-                              perspective={700}
-                              duration={30}
-                              numbers={"0"}
-                              numberClassName="mt-1 text-5xl font-extrabold tracking-tight"
-                            />
-                            <Button
-                              onClick={() => {
-                                const res = drawByRandom();
-                                if (res)
-                                  confetti({
-                                    particleCount: 180,
-                                    spread: 95,
-                                    origin: { y: 0.28 },
-                                  });
-                              }}
-                              disabled={!participants.length || !prizes.length}
-                              className="px-10 h-12 text-base"
-                            >
-                              <Shuffle className="w-4 h-4 mr-2" />
-                              Quay số
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    <div className="mt-6">
-                      <WinnersTicker
-                        items={winners}
-                        dot={THEMES[themeKey].dot}
+                <TabsContent value="participants" className="mt-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2">
+                      <ParticipantsTable
+                        participants={[
+                          {
+                            id: crypto.randomUUID(),
+                            name: "Nguyễn An",
+                            phone: "0912345678",
+                            count: 3,
+                            luckies: ["00001", "00045", "00078"],
+                          },
+                          {
+                            id: crypto.randomUUID(),
+                            name: "Trần Bình",
+                            phone: "0988888888",
+                            count: 2,
+                            luckies: ["11111", "22222"],
+                          },
+                          {
+                            id: crypto.randomUUID(),
+                            name: "Lê Chi",
+                            phone: "0909123456",
+                            count: 4,
+                            luckies: ["33333", "44444", "55555", "66666"],
+                          },
+                          {
+                            id: crypto.randomUUID(),
+                            name: "Phạm Dũng",
+                            phone: "0977777777",
+                            count: 1,
+                            luckies: ["77777"],
+                          },
+                        ]}
+                        winners={[
+                          {
+                            id: crypto.randomUUID(),
+                            time: Date.now() - 1000 * 60 * 5,
+                            prizeLabel: "Giải Nhất",
+                            name: "Nguyễn An",
+                            phone: "0912345678",
+                            luckyNumber: "00045",
+                          },
+                          {
+                            id: crypto.randomUUID(),
+                            time: Date.now() - 1000 * 60 * 3,
+                            prizeLabel: "Giải Nhì",
+                            name: "Lê Chi",
+                            phone: "0909123456",
+                            luckyNumber: "44444",
+                          },
+                          {
+                            id: crypto.randomUUID(),
+                            time: Date.now() - 1000 * 60 * 1,
+                            prizeLabel: "Giải Khuyến Khích",
+                            name: "Phạm Dũng",
+                            phone: "0977777777",
+                            luckyNumber: "77777",
+                          },
+                        ]}
                       />
                     </div>
-                  </TabsContent>
-
-                  <TabsContent value="winners" className="mt-4">
-                    <div className="border rounded-xl overflow-hidden bg-card/50">
-                      <div className="max-h-96 overflow-auto">
-                        <table className="w-full text-sm">
-                          <thead className="sticky top-0 bg-muted/80 backdrop-blur">
-                            <tr>
-                              <th className="text-left p-3 w-12">#</th>
-                              <th className="text-left p-3">Thời gian</th>
-                              <th className="text-left p-3">Giải</th>
-                              <th className="text-left p-3">Tên</th>
-                              <th className="text-left p-3">SĐT</th>
-                              <th className="text-left p-3">Ảnh</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {winners.map((w, idx) => (
-                              <tr key={w.id} className="border-t">
-                                <td className="p-3">{idx + 1}</td>
-                                <td className="p-3">
-                                  {new Date(w.time).toLocaleString()}
-                                </td>
-                                <td className="p-3 font-medium">
-                                  {w.prizeLabel}
-                                </td>
-                                <td className="p-3">{w.name ?? "—"}</td>
-                                <td className="p-3 font-mono">{w.phone}</td>
-                                <td className="p-3">
-                                  {w.image ? (
-                                    <img
-                                      src={w.image}
-                                      className="h-8 w-8 rounded object-cover"
-                                    />
-                                  ) : (
-                                    "—"
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                            {!winners.length && (
-                              <tr>
-                                <td
-                                  className="p-6 text-center text-muted-foreground"
-                                  colSpan={6}
-                                >
-                                  Chưa có người trúng
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
+                    <div>
+                      <Card className="bg-card/60">
+                        <CardHeader>
+                          <CardTitle className="text-base">Tóm tắt</CardTitle>
+                          <CardDescription>{program?.title}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Người tham gia</span>
+                            <span className="font-semibold">
+                              {participants.length}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Tổng giải</span>
+                            <span className="font-semibold">
+                              {prizes.reduce((a, b) => a + b.count, 0)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Đã trúng</span>
+                            <span className="font-semibold">
+                              {winners.length}
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
-                  </TabsContent>
-                </Tabs>
-              </>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="stage" className="mt-4">
+                  <div className="grid xl:grid-cols-3 gap-5">
+                    <Card className="xl:col-span-2">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle className="text-base">
+                              Nhập số lồng cầu
+                            </CardTitle>
+                            <CardDescription className="text-sm">
+                              Chọn số rồi bấm “Hiển thị”.
+                            </CardDescription>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="h-9 rounded-lg px-4"
+                            onClick={handleShowCage}
+                          >
+                            Hiển thị
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <DigitSelects value={cage} onChange={setCage} />
+                        <CagePreview value={cage} />
+                        <div className="flex gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="h-9 rounded-lg"
+                            onClick={() => setCage("")}
+                          >
+                            Xóa nhập
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-9 rounded-lg"
+                            onClick={resetCage}
+                          >
+                            Làm mới lịch sử
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <SummaryCard
+                      title={program?.title}
+                      display={cageDisplay}
+                      history={cageHistory}
+                    />
+                  </div>
+                  <div className="mt-6">
+                    <WinnersTicker items={winners} dot={THEMES[themeKey].dot} />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="winners" className="mt-4">
+                  <div className="border rounded-xl overflow-hidden bg-card/50">
+                    <div className="max-h-96 overflow-auto">
+                      <table className="w-full text-sm">
+                        <thead className="sticky top-0 bg-muted/80 backdrop-blur">
+                          <tr>
+                            <th className="text-left p-3 w-12">#</th>
+                            <th className="text-left p-3">Số may mắn</th>
+                            <th className="text-left p-3">Hình ảnh</th>
+                            <th className="text-left p-3">Tên giải</th>
+                            <th className="text-left p-3">Phần quà</th>
+                            <th className="text-left p-3">SĐT</th>
+                            <th className="text-left p-3">Tên KH</th>
+                            <th className="text-left p-3">Thời gian</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {winners.map((w, idx) => (
+                            <tr key={w.id} className="border-t">
+                              <td className="p-3">{idx + 1}</td>
+                              <td className="p-3 font-mono tabular-nums">
+                                {w.luckyNumber ?? "—"}
+                              </td>
+                              <td className="p-3">
+                                {w.image ? (
+                                  <img
+                                    src={w.image}
+                                    className="h-8 w-8 rounded object-cover"
+                                  />
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
+                              <td className="p-3 font-medium">
+                                {w.prizeLabel}
+                              </td>
+                              <td className="p-3">{w.prizeGift ?? "—"}</td>
+                              <td className="p-3 font-mono">{w.phone}</td>
+                              <td className="p-3">{w.name ?? "—"}</td>
+                              <td className="p-3">
+                                {new Date(w.time).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                          {!winners.length && (
+                            <tr>
+                              <td
+                                className="p-6 text-center text-muted-foreground"
+                                colSpan={8}
+                              >
+                                Chưa có người trúng
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             )}
           </CardContent>
+
+          {!isCage && (
+            <>
+              <Separator />
+              <CardFooter className="justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {/* Dot màu: {THEMES[themeKey].dot} */}
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline">Xuất CSV</Button>
+                  <Button>Phát trực tiếp</Button>
+                </div>
+              </CardFooter>
+            </>
+          )}
         </Card>
       </main>
     </Shell>

@@ -1,15 +1,21 @@
 // components/draw/FiveDigitJackpot.tsx
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import useSound from "use-sound";
 import confetti from "canvas-confetti";
 import { useDrawStore } from "@/lib/store";
 import DigitReel from "./digit-flip";
 import { useFullscreenContainer } from "@/components/draw/Fullscreen";
+import { Button } from "./ui/button";
 
-export default function FiveDigitJackpot({ size = 160 }: { size?: number }) {
+export default function FiveDigitJackpot({
+  size = 160,
+  isControl = false,
+}: {
+  size?: number;
+  isControl?: boolean;
+}) {
   const prizes = useDrawStore((s) => s.prizes);
   const winners = useDrawStore((s) => s.winners);
   const addWinnerFromJackpot = useDrawStore((s) => s.wheelStopAt);
@@ -125,18 +131,20 @@ export default function FiveDigitJackpot({ size = 160 }: { size?: number }) {
               />
             ))}
           </div>
-          {/* <div className="flex items-center gap-2">
-            <Button onClick={startAll} disabled={active.every(Boolean)}>
-              Start All
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={stopAll}
-              disabled={active.every((a) => !a)}
-            >
-              Stop All
-            </Button>
-          </div> */}
+          {isControl && (
+            <div className="flex items-center gap-2">
+              <Button onClick={startAll} disabled={active.every(Boolean)}>
+                Bắt đầu
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={stopAll}
+                disabled={active.every((a) => !a)}
+              >
+                Kết thúc
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

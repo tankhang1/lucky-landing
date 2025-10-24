@@ -107,7 +107,7 @@ export default function SpinWheel({
         disabled={!segments.length || spin}
         className="px-10 h-12 text-base"
       >
-        {spin ? "Đang quay…" : "Quay vòng"}
+        {spin ? "Đang chọn số" : "Chọn số"}
       </Button>
     </div>
   );

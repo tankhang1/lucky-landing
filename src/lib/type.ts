@@ -26,6 +26,7 @@ export type Winner = {
   prizeLabel: string;
   time: string;
   image?: string;
+  luckyNumber: number;
 };
 
 export const THEMES = {
@@ -72,7 +73,7 @@ export const DEMO_PROGRAMS: Program[] = [
     banner:
       "https://inhoalong.vn/wp-content/uploads/2024/12/mau-li-xi-tet-con-ran-2025.jpg",
     description:
-      "Tri ân khách hàng dịp Tết 2025. Quay số nhận e-voucher và quà Tết.",
+      "Tri ân khách hàng dịp Tết 2025. Chọn số nhận e-voucher và quà Tết.",
     rules: ["Mỗi SĐT có số lượt quay được cấp", "Giải không quy đổi tiền mặt"],
     theme: "tet",
   },
@@ -97,7 +98,7 @@ export const DEMO_PROGRAMS: Program[] = [
     status: "upcoming",
     banner:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdDZy_7jtXoBNsBFewPAvaus0KLDYs-j7k5Q&s",
-    description: "Quay online xuyên hè cùng quà công nghệ.",
+    description: "Chọn số online xuyên hè cùng quà công nghệ.",
     theme: "ocean",
   },
 ];

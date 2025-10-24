@@ -6,6 +6,7 @@ export type Participant = {
   name?: string;
   phone: string;
   count: number;
+  luckies: string[];
 };
 
 const samplePrizes: Prize[] = [
@@ -98,7 +99,19 @@ const sampleParticipants: Participant[] = Array.from({ length: 80 }).map(
     const name = names[i % names.length] + " " + (i + 1);
     const phone = "09" + String(10000000 + i * 317).slice(0, 8);
     const count = Math.floor(Math.random() * 5) + 1;
-    return { id: crypto.randomUUID(), name, phone, count };
+
+    // 🎯 Generate random 5-digit lucky numbers
+    const luckies = Array.from({ length: count }).map(() =>
+      String(Math.floor(Math.random() * 100000)).padStart(5, "0")
+    );
+
+    return {
+      id: crypto.randomUUID(),
+      name,
+      phone,
+      count,
+      luckies,
+    };
   }
 );
 
@@ -121,6 +134,7 @@ export type DrawActions = {
   wheelStopAt: (i: number) => Winner | null;
   resetCage: () => void;
   showCage: (n: string) => void;
+  showHistoryCage: (n: string) => void;
 };
 
 export const useDrawStore = create<DrawState & DrawActions>((set, get) => ({
@@ -159,6 +173,7 @@ export const useDrawStore = create<DrawState & DrawActions>((set, get) => ({
       prizeLabel: prize.label,
       time: new Date().toISOString(),
       image: prize.image,
+      luckyNumber: Math.floor(Math.random() * 10000),
     };
     set({ winners: [record, ...s.winners], prizes: s.prizes.slice(1) });
     return record;
@@ -180,6 +195,7 @@ export const useDrawStore = create<DrawState & DrawActions>((set, get) => ({
       prizeLabel: prize.label,
       time: new Date().toISOString(),
       image: prize.image,
+      luckyNumber: Math.floor(Math.random() * 10000),
     };
     const list = [...s.prizes];
     if (list[i].count > 1) list[i] = { ...list[i], count: list[i].count - 1 };
@@ -190,8 +206,11 @@ export const useDrawStore = create<DrawState & DrawActions>((set, get) => ({
 
   resetCage: () => set({ cageDisplay: "", cageHistory: [] }),
   showCage: (n: string) =>
-    set((s) => ({
+    set(() => ({
       cageDisplay: n,
-      cageHistory: [n, ...s.cageHistory].slice(0, 10),
+    })),
+  showHistoryCage: (n: string) =>
+    set((pre) => ({
+      cageHistory: [...pre.cageHistory, n],
     })),
 }));
