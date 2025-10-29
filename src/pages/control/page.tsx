@@ -397,7 +397,7 @@ export default function ControlPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <CardTitle className="text-base">
-                              Nhập số lồng cầu
+                              Nhập số online
                             </CardTitle>
                             <CardDescription className="text-sm">
                               Chọn số rồi bấm “Hiển thị”.
@@ -519,7 +519,7 @@ export default function ControlPage() {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline">Xuất CSV</Button>
-                  <Button>Phát trực tiếp</Button>
+                  {/* <Button>Phát trực tiếp</Button> */}
                 </div>
               </CardFooter>
             </>

@@ -133,7 +133,7 @@ export default function AudienceDeluxe() {
       <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
         <div className="w-full lg:w-1/2 flex flex-col items-center justify-center gap-8">
           <div className="text-4xl md:text-5xl font-black tracking-tight text-neutral-900">
-            Quay số may mắn
+            Chọn số may mắn
           </div>
           <div className="rounded-3xl border bg-white/60 backdrop-blur p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]">
             <FiveDigitJackpot />
