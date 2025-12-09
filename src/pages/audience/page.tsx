@@ -13,7 +13,7 @@ import {
 import FiveDigitJackpot from "@/components/five-digit-jackpot";
 import WinnersTicker from "@/components/draw/WinnersTicker";
 import { useDrawStore } from "@/lib/store";
-import { DEMO_PROGRAMS, THEMES } from "@/lib/type";
+import { THEMES } from "@/lib/type";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
@@ -70,12 +70,13 @@ function PrizeTicker({
 
 export default function AudienceDeluxe() {
   const navigate = useNavigate();
+  const programs = useDrawStore((s) => s.programs);
   const programId = useDrawStore((s) => s.programId);
   const program = useMemo(
-    () => DEMO_PROGRAMS.find((p) => p.id === programId),
+    () => programs?.find((p) => p.id === programId),
     [programId]
   );
-  const themeKey = (program?.theme ?? "tet") as keyof typeof THEMES;
+  const themeKey = program?.status as keyof typeof THEMES;
   const winners = useDrawStore((s) => s.winners);
   const prizes = useDrawStore((s) => s.prizes);
 

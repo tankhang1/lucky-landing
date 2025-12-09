@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Users } from "lucide-react";
 import confetti from "canvas-confetti";
-import { DEMO_PROGRAMS, THEMES } from "@/lib/type";
+import { THEMES } from "@/lib/type";
 import { useDrawStore } from "@/lib/store";
 import { isSpecial } from "@/lib/utils";
 import { ParticipantsTable } from "./components/participants-table";
@@ -105,10 +105,10 @@ function SummaryCard({
 export default function ControlPage() {
   const [digitCount, setDigitCount] = useState(3);
   const [selectedPrizeId, setSelectedPrizeId] = useState("p1");
-
+  const programs = useDrawStore((s) => s.programs);
   const programId = useDrawStore((s) => s.programId);
-  const program = DEMO_PROGRAMS.find((p) => p.id === programId);
-  const themeKey = (program?.theme ?? "tet") as keyof typeof THEMES;
+  const program = programs?.find((p) => p.id === programId);
+  const themeKey = program?.status as keyof typeof THEMES;
   const isCage = program?.type === "cage";
 
   const prizes = useDrawStore((s) => s.prizes);
@@ -238,7 +238,7 @@ export default function ControlPage() {
                     <CardHeader className="py-6">
                       <CardTitle className="text-lg">Tóm tắt</CardTitle>
                       <CardDescription className="truncate">
-                        {program?.title}
+                        {program?.name}
                       </CardDescription>
                     </CardHeader>
                   </div>
@@ -368,7 +368,7 @@ export default function ControlPage() {
                       <Card className="bg-card/60">
                         <CardHeader>
                           <CardTitle className="text-base">Tóm tắt</CardTitle>
-                          <CardDescription>{program?.title}</CardDescription>
+                          <CardDescription>{program?.name}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-2 text-sm">
                           <div className="flex justify-between">
@@ -450,7 +450,7 @@ export default function ControlPage() {
                     </Card>
 
                     <SummaryCard
-                      title={program?.title}
+                      title={program?.name}
                       display={cageDisplay}
                       history={cageHistory}
                     />

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { DEMO_PROGRAMS, type Prize, type Winner } from "./type";
+import { type Prize, type Winner } from "./type";
 import type { TCampaign } from "@/react-query/services/campaign/campaign.service";
 
 export type Participant = {

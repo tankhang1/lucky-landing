@@ -16,17 +16,18 @@ import { Separator } from "@/components/ui/separator";
 import { useMemo, useState } from "react";
 import { useSyncAcrossTabs } from "@/lib/sync";
 import { useDrawStore } from "@/lib/store";
-import { DEMO_PROGRAMS, THEMES } from "@/lib/type";
+import { THEMES } from "@/lib/type";
 import { isSpecial } from "@/lib/utils";
 
 export default function CageControlPage() {
   useSyncAcrossTabs("control");
+  const programs = useDrawStore((s) => s.programs);
   const programId = useDrawStore((s) => s.programId);
   const program = useMemo(
-    () => DEMO_PROGRAMS.find((p) => p.id === programId),
+    () => programs?.find((p) => p.id === programId),
     [programId]
   );
-  const themeKey = (program?.theme ?? "tet") as keyof typeof THEMES;
+  const themeKey = program?.status as keyof typeof THEMES;
 
   const cageDisplay = useDrawStore((s) => s.cageDisplay);
   const cageHistory = useDrawStore((s) => s.cageHistory);
