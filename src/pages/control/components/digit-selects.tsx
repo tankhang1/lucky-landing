@@ -1,27 +1,15 @@
 import { useCallback, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 type DigitSelectsProps = {
   value: string;
+  digitCount: number;
+  onChangeDigitCount: (value: number) => void;
   onChange: (val: string) => void;
-  onConfirmDigit?: (idx: number, val: string, next: string) => void; // e.g. showCage(next)
-  onConfirmFull?: (val: string) => void; // e.g. showCage(val)
   confirmPerDigit?: boolean; // default true
   className?: string;
   labelClass?: string;
@@ -30,26 +18,17 @@ type DigitSelectsProps = {
 
 export function DigitSelects({
   value,
+  digitCount,
   onChange,
-  onConfirmDigit,
-  onConfirmFull,
+  onChangeDigitCount,
   confirmPerDigit = true,
   className,
   labelClass = "text-[11px] text-neutral-500",
-  triggerClass = "h-14",
 }: DigitSelectsProps) {
   const digits = useMemo(
-    () => Array.from({ length: 5 }, (_, i) => value[i] ?? ""),
-    [value]
+    () => Array.from({ length: digitCount }, (_, i) => value[i] ?? ""),
+    [value, digitCount]
   );
-
-  const [open, setOpen] = useState(false);
-  const [confirmType, setConfirmType] = useState<"digit" | "full">("digit");
-  const [pending, setPending] = useState<{
-    idx: number;
-    val: string;
-    next: string;
-  } | null>(null);
 
   const handleChange = useCallback(
     (idx: number, v: string) => {
@@ -57,30 +36,36 @@ export function DigitSelects({
       nextArr[idx] = v;
       const next = nextArr.join("");
       onChange(next);
-
-      if (confirmPerDigit) {
-        setPending({ idx, val: v, next });
-        setConfirmType("digit");
-        setOpen(true);
-      } else if (nextArr.every((d) => d !== "")) {
-        setPending({ idx, val: v, next });
-        setConfirmType("full");
-        setOpen(true);
-      }
     },
     [digits, onChange, confirmPerDigit]
   );
 
-  const confirm = () => {
-    if (!pending) return;
-    if (confirmType === "digit" && onConfirmDigit)
-      onConfirmDigit(pending.idx, pending.val, pending.next);
-    if (confirmType === "full" && onConfirmFull) onConfirmFull(pending.next);
-    setOpen(false);
-  };
-
   return (
     <>
+      <div className="space-y-3">
+        <Label className="text-slate-600">Số lượng chữ số hiển thị</Label>
+        <div className="flex gap-2 p-1 bg-slate-100/80 rounded-lg">
+          {[3, 4, 5].map((count) => (
+            <button
+              key={count}
+              onClick={() => {
+                onChangeDigitCount(count);
+                onChange("");
+              }}
+              className={cn(
+                "flex-1 py-2 text-sm font-medium rounded-md transition-all duration-200",
+                digitCount === count
+                  ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+              )}
+            >
+              {count} số
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Separator />
       <div
         className={cn(
           "grid w-full gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-5 items-stretch",
@@ -90,52 +75,14 @@ export function DigitSelects({
         {digits.map((d, i) => (
           <div key={i} className="space-y-1 min-w-0">
             <Label className={labelClass}>Số {i + 1}</Label>
-            <Select value={d} onValueChange={(v) => handleChange(i, v)}>
-              <SelectTrigger
-                className={cn(
-                  "w-full rounded-lg text-center text-base font-medium tabular-nums",
-                  triggerClass
-                )}
-              >
-                <SelectValue placeholder="0" />
-              </SelectTrigger>
-              <SelectContent
-                align="start"
-                className="rounded-lg w-[var(--radix-select-trigger-width)] min-w-0"
-              >
-                {Array.from({ length: 10 }, (_, n) => (
-                  <SelectItem key={n} value={String(n)} className="text-base">
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+            <Input
+              value={d}
+              onChange={(e) => handleChange(i, e.target.value)}
+            />
           </div>
         ))}
       </div>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>
-              {confirmType === "digit"
-                ? "Hiển thị số này?"
-                : "Hiển thị toàn bộ 5 số?"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="text-sm text-muted-foreground">
-            {confirmType === "digit"
-              ? `Sẽ hiển thị chuỗi hiện tại: ${pending?.next || "—"}`
-              : `Chuỗi đầy đủ: ${pending?.next || "—"}`}
-          </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Hủy
-            </Button>
-            <Button onClick={confirm}>Hiển thị</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

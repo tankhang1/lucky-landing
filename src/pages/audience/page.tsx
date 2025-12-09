@@ -1,8 +1,15 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { ArrowLeft, Crown, Gift, Maximize2, Minimize2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Crown,
+  Gift,
+  Maximize2,
+  Minimize2,
+  Trophy,
+} from "lucide-react";
 import FiveDigitJackpot from "@/components/five-digit-jackpot";
 import WinnersTicker from "@/components/draw/WinnersTicker";
 import { useDrawStore } from "@/lib/store";
@@ -132,9 +139,24 @@ export default function AudienceDeluxe() {
 
       <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
         <div className="w-full lg:w-1/2 flex flex-col items-center justify-center gap-8">
-          <div className="text-4xl md:text-5xl font-black tracking-tight text-neutral-900">
-            Chọn số may mắn
+          <div className="flex items-center gap-2 text-xl font-bold text-amber-600/80 tracking-widest uppercase">
+            <Trophy className="w-5 h-5 mb-1" />
+            <span>GIẢI ĐANG QUAY</span>
+            <Trophy className="w-5 h-5 mb-1" />
           </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key="DB"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center"
+            >
+              <div className="text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-neutral-800 to-neutral-600 drop-shadow-sm leading-tight p-2">
+                GIẢI ĐẶC BIỆT
+              </div>
+            </motion.div>
+          </AnimatePresence>
           <div className="rounded-3xl border bg-white/60 backdrop-blur p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]">
             <FiveDigitJackpot />
           </div>
@@ -152,7 +174,7 @@ export default function AudienceDeluxe() {
               <Crown className="relative w-8 h-8 text-amber-600 drop-shadow" />
             </div>
             <div className="text-2xl md:text-3xl font-bold text-neutral-900">
-              Người trúng gần nhất
+              SỐ TRÚNG THƯỞNG GẦN NHẤT
             </div>
             <button
               onClick={toggleFullScreen}

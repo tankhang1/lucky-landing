@@ -57,6 +57,8 @@ function SummaryCard({
   display: string;
   history: string[];
 }) {
+  const [digitCount, setDigitCount] = useState(3);
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -101,6 +103,8 @@ function SummaryCard({
 }
 
 export default function ControlPage() {
+  const [digitCount, setDigitCount] = useState(3);
+
   const programId = useDrawStore((s) => s.programId);
   const program = DEMO_PROGRAMS.find((p) => p.id === programId);
   const themeKey = (program?.theme ?? "tet") as keyof typeof THEMES;
@@ -134,7 +138,10 @@ export default function ControlPage() {
 
   const handleShowCage = useCallback(() => {
     if (!cage) return;
-    const normalized = cage.replace(/\D/g, "").padStart(5, "0").slice(-5);
+    const normalized = cage
+      .replace(/\D/g, "")
+      .padStart(digitCount, "0")
+      .slice(-digitCount);
     showCage(normalized);
     showHistoryCage(normalized);
     setCage("");
@@ -179,15 +186,9 @@ export default function ControlPage() {
                         <DigitSelects
                           value={cage}
                           onChange={setCage}
-                          onConfirmDigit={(idx, val, next) => {
-                            // hiển thị từng bước (Audience sẽ thấy dần)
-                            showCage(next);
-                          }}
-                          onConfirmFull={(full) => {
-                            // chỉ hiển thị khi đủ 5 số
-                            showCage(full);
-                          }}
-                          confirmPerDigit // hoặc false nếu muốn chỉ confirm khi đủ 5 số
+                          confirmPerDigit
+                          digitCount={digitCount}
+                          onChangeDigitCount={setDigitCount}
                         />
                         <div className="text-xs text-neutral-500">
                           Dùng Tab để chuyển nhanh giữa các ô.
