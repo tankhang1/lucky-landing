@@ -4,6 +4,14 @@ import { Label } from "@/components/ui/label";
 
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Prize } from "@/lib/type";
 
 type DigitSelectsProps = {
   value: string;
@@ -14,6 +22,9 @@ type DigitSelectsProps = {
   className?: string;
   labelClass?: string;
   triggerClass?: string;
+  prizes: Prize[];
+  selectedPrizeId: string;
+  onPrizeChange: (id: string) => void;
 };
 
 export function DigitSelects({
@@ -24,6 +35,9 @@ export function DigitSelects({
   confirmPerDigit = true,
   className,
   labelClass = "text-[11px] text-neutral-500",
+  prizes,
+  selectedPrizeId,
+  onPrizeChange,
 }: DigitSelectsProps) {
   const digits = useMemo(
     () => Array.from({ length: digitCount }, (_, i) => value[i] ?? ""),
@@ -42,29 +56,50 @@ export function DigitSelects({
 
   return (
     <>
-      <div className="space-y-3">
-        <Label className="text-slate-600">Số lượng chữ số hiển thị</Label>
-        <div className="flex gap-2 p-1 bg-slate-100/80 rounded-lg">
-          {[3, 4, 5].map((count) => (
-            <button
-              key={count}
-              onClick={() => {
-                onChangeDigitCount(count);
-                onChange("");
-              }}
-              className={cn(
-                "flex-1 py-2 text-sm font-medium rounded-md transition-all duration-200",
-                digitCount === count
-                  ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200"
-                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-              )}
-            >
-              {count} số
-            </button>
-          ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-slate-600 font-semibold text-xs uppercase tracking-wider">
+            Giải thưởng
+          </Label>
+          <Select value={selectedPrizeId} onValueChange={onPrizeChange}>
+            <SelectTrigger className="w-full h-10 bg-white border-slate-200">
+              <SelectValue placeholder="Chọn giải..." />
+            </SelectTrigger>
+            <SelectContent>
+              {prizes.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.label} (SL: {p.count})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-slate-600 font-semibold text-xs uppercase tracking-wider">
+            Số ô hiển thị
+          </Label>
+          <div className="flex gap-2 p-1 bg-slate-100 rounded-lg">
+            {[3, 4, 5].map((count) => (
+              <button
+                key={count}
+                onClick={() => {
+                  onChangeDigitCount(count);
+                  onChange(""); // Clear input on mode change
+                }}
+                className={cn(
+                  "flex-1 py-1.5 text-sm font-medium rounded-md transition-all duration-200",
+                  digitCount === count
+                    ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                )}
+              >
+                {count}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-
       <Separator />
       <div
         className={cn(

@@ -104,6 +104,7 @@ function SummaryCard({
 
 export default function ControlPage() {
   const [digitCount, setDigitCount] = useState(3);
+  const [selectedPrizeId, setSelectedPrizeId] = useState("p1");
 
   const programId = useDrawStore((s) => s.programId);
   const program = DEMO_PROGRAMS.find((p) => p.id === programId);
@@ -189,6 +190,9 @@ export default function ControlPage() {
                           confirmPerDigit
                           digitCount={digitCount}
                           onChangeDigitCount={setDigitCount}
+                          prizes={prizes}
+                          selectedPrizeId={selectedPrizeId}
+                          onPrizeChange={setSelectedPrizeId}
                         />
                         <div className="text-xs text-neutral-500">
                           Dùng Tab để chuyển nhanh giữa các ô.
@@ -414,7 +418,15 @@ export default function ControlPage() {
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <DigitSelects value={cage} onChange={setCage} />
+                        <DigitSelects
+                          value={cage}
+                          onChange={setCage}
+                          digitCount={digitCount}
+                          onChangeDigitCount={setDigitCount}
+                          selectedPrizeId={selectedPrizeId}
+                          onPrizeChange={setSelectedPrizeId}
+                          prizes={prizes}
+                        />
                         <CagePreview value={cage} />
                         <div className="flex gap-2">
                           <Button
