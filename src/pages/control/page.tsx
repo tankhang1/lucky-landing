@@ -493,10 +493,8 @@ export default function ControlPage() {
                                   "—"
                                 )}
                               </td>
-                              <td className="p-3 font-medium">
-                                {w.prizeLabel}
-                              </td>
-                              <td className="p-3">{w?.prizeGift ?? "—"}</td>
+                              <td className="p-3 font-medium">{w.prizeId}</td>
+                              <td className="p-3">{w?.prizeLabel ?? "—"}</td>
                               <td className="p-3 font-mono">{w.phone}</td>
                               <td className="p-3">{w.name ?? "—"}</td>
                               <td className="p-3">
