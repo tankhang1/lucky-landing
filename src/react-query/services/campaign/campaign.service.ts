@@ -81,3 +81,47 @@ export const getListCustomerCampaign = async (
   });
   return data;
 };
+
+export type TCampaignGift = {
+  id: number;
+  campaign_item: number;
+  campaign_code: string;
+  award_name: string;
+  gift_code: string;
+  gift_name: string;
+  gift_image: string;
+  gift_image_thumb: any;
+  counter: number;
+  limits: number;
+  type_extra: number;
+  status: number;
+  time_create: string;
+  time_deactive: string;
+};
+
+export type TGetListGiftCampaignReq = {
+  c: string;
+};
+export type TGetListGiftCampaignRes = TCampaignGift[];
+export const getListGiftCampaign = async (
+  params: TGetListGiftCampaignReq
+): Promise<TGetListGiftCampaignRes> => {
+  const { data } = await api.get(PATH.CAMPAIGN.GET_LIST_GIFT, {
+    params,
+  });
+  return data;
+};
+
+export type TRequestLuckyManualReq = {
+  campaign_code: string;
+  numb: number;
+  gift_code: string;
+};
+
+export type TRequestLuckyManualRes = {};
+export const requestLuckyManual = async (
+  body: TRequestLuckyManualReq
+): Promise<TRequestLuckyManualRes> => {
+  const { data } = await api.post(PATH.CAMPAIGN.REQUEST_LUCKY_MANUAL, body);
+  return data;
+};

@@ -3,13 +3,19 @@ import {
   getCampaignDetailNumber,
   getListCampaign,
   getListCustomerCampaign,
+  getListGiftCampaign,
+  requestLuckyManual,
   type TGetCampaignDetailNumberReq,
   type TGetCampaignDetailNumberRes,
   type TGetListCampaignRes,
   type TGetListCustomerCampaignReq,
   type TGetListCustomerCampaignRes,
+  type TGetListGiftCampaignReq,
+  type TGetListGiftCampaignRes,
+  type TRequestLuckyManualReq,
+  type TRequestLuckyManualRes,
 } from "@/react-query/services/campaign/campaign.service";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
 export const useGetListCampaign = () => {
@@ -45,5 +51,26 @@ export const useGetListCustomerCampaign = (
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
+  });
+};
+
+export const useGetListGiftCampaign = (params: TGetListGiftCampaignReq) => {
+  return useQuery<TGetListGiftCampaignRes, AxiosError<null>>({
+    queryKey: [QUERY_KEY.CAMPAGIN.LIST_GIFT, params],
+    queryFn: () => getListGiftCampaign(params),
+    enabled: !!params,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const useRequestLuckyManual = () => {
+  return useMutation<
+    TRequestLuckyManualRes,
+    AxiosError<null>,
+    TRequestLuckyManualReq
+  >({
+    mutationFn: requestLuckyManual,
   });
 };

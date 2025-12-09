@@ -22,13 +22,23 @@ import { useDrawStore } from "@/lib/store";
 import { isSpecial } from "@/lib/utils";
 import { ParticipantsTable } from "./components/participants-table";
 import { DigitSelects } from "./components/digit-selects";
-import { useGetListCustomerCampaign } from "@/react-query/queries/campaign/campaign";
+import {
+  useGetListCustomerCampaign,
+  useGetListGiftCampaign,
+  useRequestLuckyManual,
+} from "@/react-query/queries/campaign/campaign";
 
-type Participant = { id: string; name?: string; phone: string; count: number };
-
-function CagePreview({ value, size = 40 }: { value: string; size?: number }) {
+function CagePreview({
+  value,
+  count = 5,
+  size = 40,
+}: {
+  value: string;
+  count: number;
+  size?: number;
+}) {
   const digits = useMemo(
-    () => Array.from({ length: 5 }, (_, i) => value[i] ?? "–"),
+    () => Array.from({ length: count }, (_, i) => value[i] ?? "–"),
     [value]
   );
   return (
@@ -109,12 +119,17 @@ export default function ControlPage() {
   const program = programs?.find((p) => p.id === programId);
   const themeKey = program?.status as keyof typeof THEMES;
   const isCage = program?.type === "cage";
-  const { data: customers, isPending: isLoadingListCustomer } =
-    useGetListCustomerCampaign({
-      campaignCode: program?.code || "",
-    });
+  const { data: customers } = useGetListCustomerCampaign({
+    campaignCode: program?.code || "",
+  });
+  const { data: gifts } = useGetListGiftCampaign({
+    c: program?.code || "",
+  });
+  const { mutate: requestLucky, isPending: isLoadingRequest } =
+    useRequestLuckyManual();
 
   const prizes = useDrawStore((s) => s.prizes);
+  const setPrize = useDrawStore((s) => s.setPrize);
   const winners = useDrawStore((s) => s.winners);
   const drawByRandom = useDrawStore((s) => s.drawByRandom);
   const showCage = useDrawStore((s) => s.showCage);
@@ -140,16 +155,39 @@ export default function ControlPage() {
   }, [isCage, drawByRandom]);
 
   const handleShowCage = useCallback(() => {
-    if (!cage) return;
+    if (!cage || !program?.code) return;
     const normalized = cage
       .replace(/\D/g, "")
       .padStart(digitCount, "0")
       .slice(-digitCount);
-    showCage(normalized);
-    showHistoryCage(normalized);
-    setCage("");
+    console.log({
+      campaign_code: program.code,
+      gift_code: selectedPrizeId,
+      numb: +cage,
+    });
+    requestLucky(
+      {
+        campaign_code: program.code,
+        gift_code: selectedPrizeId,
+        numb: +cage,
+      },
+      {
+        onSuccess: () => {
+          showCage(normalized);
+          showHistoryCage(normalized);
+          setCage("");
+        },
+        onError: () => {
+          alert("Nhập số thất bại");
+        },
+      }
+    );
   }, [cage, showCage]);
-
+  useEffect(() => {
+    if (prizes && prizes.length > 0) {
+      setPrize(prizes);
+    }
+  }, [prizes]);
   return (
     <Shell>
       <main className="container mx-auto px-4 py-6 space-y-6">
@@ -213,7 +251,7 @@ export default function ControlPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         {Array.from(
-                          { length: 5 },
+                          { length: digitCount },
                           (_, i) => cage[i] ?? "–"
                         ).map((d, i) => {
                           const active = d !== "–";
@@ -336,7 +374,7 @@ export default function ControlPage() {
                           <div className="flex justify-between">
                             <span>Tổng giải</span>
                             <span className="font-semibold">
-                              {prizes.reduce((a, b) => a + b.count, 0)}
+                              {gifts?.length || 0}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -368,8 +406,9 @@ export default function ControlPage() {
                             size="sm"
                             className="h-9 rounded-lg px-4"
                             onClick={handleShowCage}
+                            disabled={isLoadingRequest}
                           >
-                            Hiển thị
+                            {isLoadingRequest ? "Đang xử lí..." : "Hiển thị"}
                           </Button>
                         </div>
                       </CardHeader>
@@ -381,9 +420,9 @@ export default function ControlPage() {
                           onChangeDigitCount={setDigitCount}
                           selectedPrizeId={selectedPrizeId}
                           onPrizeChange={setSelectedPrizeId}
-                          prizes={prizes}
+                          prizes={gifts || []}
                         />
-                        <CagePreview value={cage} />
+                        <CagePreview value={cage} count={digitCount} />
                         <div className="flex gap-2">
                           <Button
                             variant="secondary"

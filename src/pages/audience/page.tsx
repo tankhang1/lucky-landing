@@ -294,9 +294,9 @@ export default function AudienceDeluxe() {
 
         <PrizeTicker
           items={prizes.map((p) => ({
-            label: p.label,
-            count: p.count,
-            image: p.image,
+            label: p.gift_name,
+            count: p.counter,
+            image: p.gift_image,
           }))}
         />
       </div>

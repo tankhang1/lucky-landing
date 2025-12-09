@@ -36,8 +36,8 @@ const CustomerLuckyModal = ({
   const [showOnlyWinners, setShowOnlyWinners] = useState(false);
   const { data: listNumbers, isPending: isLoadingListNumber } =
     useGetCampaignNumberDetail({
-      c: "tungbunghethu1",
-      p: "84362524243",
+      c: code,
+      p: customer?.phone || "",
     });
 
   const formatTime = (timeStr: string) => {

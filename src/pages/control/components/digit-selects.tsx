@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Prize } from "@/lib/type";
+import type { TCampaignGift } from "@/react-query/services/campaign/campaign.service";
 
 type DigitSelectsProps = {
   value: string;
@@ -22,7 +22,7 @@ type DigitSelectsProps = {
   className?: string;
   labelClass?: string;
   triggerClass?: string;
-  prizes: Prize[];
+  prizes: TCampaignGift[];
   selectedPrizeId: string;
   onPrizeChange: (id: string) => void;
 };
@@ -67,8 +67,8 @@ export function DigitSelects({
             </SelectTrigger>
             <SelectContent>
               {prizes.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.label} (SL: {p.count})
+                <SelectItem key={p.gift_code} value={p.gift_code.toString()}>
+                  {p.gift_name} (SL: {p.counter}/{p.limits})
                 </SelectItem>
               ))}
             </SelectContent>
