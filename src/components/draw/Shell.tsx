@@ -74,7 +74,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                       </Badge>
                       <span>{p.name}</span>
                       <Badge variant="outline">
-                        {p?.type === "cage" ? "Lồng cầu" : "Online"}
+                        {p?.type === 0 ? "Lồng cầu" : "Online"}
                       </Badge>
                     </div>
                   </SelectItem>

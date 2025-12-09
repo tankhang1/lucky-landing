@@ -2,11 +2,14 @@ import QUERY_KEY from "@/constants/key";
 import {
   getCampaignDetailNumber,
   getListCampaign,
+  getListCampaignLuckyHistory,
   getListCustomerCampaign,
   getListGiftCampaign,
   requestLuckyManual,
   type TGetCampaignDetailNumberReq,
   type TGetCampaignDetailNumberRes,
+  type TGetListCampaignLuckyHistoryReq,
+  type TGetListCampaignLuckyHistoryRes,
   type TGetListCampaignRes,
   type TGetListCustomerCampaignReq,
   type TGetListCustomerCampaignRes,
@@ -72,5 +75,18 @@ export const useRequestLuckyManual = () => {
     TRequestLuckyManualReq
   >({
     mutationFn: requestLuckyManual,
+  });
+};
+
+export const useGetListLuckyHistory = (
+  params: TGetListCampaignLuckyHistoryReq
+) => {
+  return useQuery<TGetListCampaignLuckyHistoryRes, AxiosError<null>>({
+    queryKey: [QUERY_KEY.CAMPAGIN.LIST_LUCKY_HISTORY, params],
+    queryFn: () => getListCampaignLuckyHistory(params),
+    enabled: !!params,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
   });
 };

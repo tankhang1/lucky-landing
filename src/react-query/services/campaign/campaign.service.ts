@@ -27,7 +27,7 @@ export type TCampaign = {
   number_extra?: string;
   pdf_link?: string;
   audio_link?: string;
-  type?: string;
+  type: number; //0  (manual) , 1(random)
 };
 
 export type TGetListCampaignRes = TCampaign[];
@@ -123,5 +123,30 @@ export const requestLuckyManual = async (
   body: TRequestLuckyManualReq
 ): Promise<TRequestLuckyManualRes> => {
   const { data } = await api.post(PATH.CAMPAIGN.REQUEST_LUCKY_MANUAL, body);
+  return data;
+};
+
+export type TCampaignLuckyHistory = {
+  number: number;
+  consumer_name: string;
+  award_name: string;
+  gift_image: string;
+  consumer_code: any;
+  gift_name: string;
+  consumer_phone: string;
+  time: string;
+  award_time: string;
+};
+
+export type TGetListCampaignLuckyHistoryReq = {
+  c: string;
+};
+export type TGetListCampaignLuckyHistoryRes = TCampaignLuckyHistory[];
+export const getListCampaignLuckyHistory = async (
+  params: TGetListCampaignLuckyHistoryReq
+): Promise<TGetListCampaignLuckyHistoryRes> => {
+  const { data } = await api.get(PATH.CAMPAIGN.GET_LUCKY_HISTORY, {
+    params,
+  });
   return data;
 };

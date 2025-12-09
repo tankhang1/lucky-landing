@@ -4,9 +4,6 @@ import axios from "axios";
 // Create the instance
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL, // Replace with your Env Variable
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 api.interceptors.request.use((config) => {

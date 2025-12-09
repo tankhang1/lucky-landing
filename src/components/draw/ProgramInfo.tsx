@@ -45,7 +45,7 @@ export default function ProgramInfo({
                 : "Sắp diễn ra"}
             </Badge>
             <Badge variant="outline">{program.code}</Badge>
-            <Badge>{program.type === "cage" ? "Lồng cầu" : "Online"}</Badge>
+            <Badge>{program.type === 0 ? "Lồng cầu" : "Online"}</Badge>
           </div>
           <div
             className={`text-2xl font-extrabold bg-clip-text text-transparent ${THEMES[themeKey].title}`}
@@ -57,7 +57,7 @@ export default function ProgramInfo({
               <div className="flex items-start gap-2 text-sm text-muted-foreground/80">
                 <CalendarClock className="w-4 h-4 mt-0.5 shrink-0 text-primary/60" />
                 <div
-                  className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0 [&>p]:leading-normal"
+                  className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0 [&>p]:leading-normal whitespace-pre-line"
                   dangerouslySetInnerHTML={{
                     __html: program.description_short,
                   }}

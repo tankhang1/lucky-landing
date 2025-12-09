@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Users } from "lucide-react";
+import { AlertCircle, Gift, Hash, Trophy, Users } from "lucide-react";
 import confetti from "canvas-confetti";
 import { THEMES } from "@/lib/type";
 import { useDrawStore } from "@/lib/store";
@@ -25,8 +25,10 @@ import { DigitSelects } from "./components/digit-selects";
 import {
   useGetListCustomerCampaign,
   useGetListGiftCampaign,
+  useGetListLuckyHistory,
   useRequestLuckyManual,
 } from "@/react-query/queries/campaign/campaign";
+import { Badge } from "@/components/ui/badge";
 
 function CagePreview({
   value,
@@ -118,11 +120,14 @@ export default function ControlPage() {
   const programId = useDrawStore((s) => s.programId);
   const program = programs?.find((p) => p.id === programId);
   const themeKey = program?.status as keyof typeof THEMES;
-  const isCage = program?.type === "cage";
+  const isCage = false;
   const { data: customers } = useGetListCustomerCampaign({
     campaignCode: program?.code || "",
   });
   const { data: gifts } = useGetListGiftCampaign({
+    c: program?.code || "",
+  });
+  const { data: histories } = useGetListLuckyHistory({
     c: program?.code || "",
   });
   const { mutate: requestLucky, isPending: isLoadingRequest } =
@@ -153,7 +158,12 @@ export default function ControlPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isCage, drawByRandom]);
-
+  const getProgressColor = (percent: number, isFull: boolean) => {
+    if (isFull) return "bg-neutral-400"; // Hết quà: Màu xám
+    if (percent > 90) return "bg-red-500"; // Sắp hết: Màu đỏ
+    if (percent > 75) return "bg-amber-500"; // Còn ít: Màu cam
+    return "bg-emerald-500"; // Còn nhiều: Màu xanh ngọc
+  };
   const handleShowCage = useCallback(() => {
     if (!cage || !program?.code) return;
     const normalized = cage
@@ -338,6 +348,13 @@ export default function ControlPage() {
                     <Users className="h-4 w-4" />
                     Người tham gia
                   </TabsTrigger>
+                  <TabsTrigger
+                    value="gifts"
+                    className="flex items-center gap-2"
+                  >
+                    <Gift className="h-4 w-4" />
+                    Giải thưởng
+                  </TabsTrigger>
                   <TabsTrigger value="stage">Màn quay</TabsTrigger>
                   <TabsTrigger value="winners">Danh sách trúng</TabsTrigger>
                 </TabsList>
@@ -374,13 +391,16 @@ export default function ControlPage() {
                           <div className="flex justify-between">
                             <span>Tổng giải</span>
                             <span className="font-semibold">
-                              {gifts?.length || 0}
+                              {gifts?.reduce(
+                                (pre, cur) => pre + cur.limits,
+                                0
+                              ) || 0}
                             </span>
                           </div>
                           <div className="flex justify-between">
                             <span>Đã trúng</span>
                             <span className="font-semibold">
-                              {winners.length}
+                              {histories?.length || 0}
                             </span>
                           </div>
                         </CardContent>
@@ -388,7 +408,144 @@ export default function ControlPage() {
                     </div>
                   </div>
                 </TabsContent>
+                <TabsContent
+                  value="gifts"
+                  className="mt-4 animate-in fade-in zoom-in-95 duration-300"
+                >
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {gifts?.map((item) => {
+                      const percent =
+                        item.limits > 0
+                          ? (item.counter / item.limits) * 100
+                          : 0;
+                      const isFull = item.counter >= item.limits;
+                      const progressColor = getProgressColor(percent, isFull);
 
+                      return (
+                        <Card
+                          key={item.id}
+                          className={`group relative flex flex-col h-full overflow-hidden border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                            isFull ? "opacity-80 bg-neutral-50" : "bg-white"
+                          }`}
+                        >
+                          {/* --- Phần Header Chứa Ảnh --- */}
+                          <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 p-6 flex items-center justify-center border-b border-slate-100">
+                            {/* Tên Giải Thưởng (Badge nổi) */}
+                            <div className="absolute top-3 left-3 z-10">
+                              <Badge
+                                variant={isFull ? "secondary" : "default"}
+                                className={`shadow-sm backdrop-blur-md ${
+                                  isFull
+                                    ? "bg-neutral-200 text-neutral-600"
+                                    : "bg-primary/90 hover:bg-primary"
+                                }`}
+                              >
+                                {isFull ? "Đã trao hết" : item.award_name}
+                              </Badge>
+                            </div>
+
+                            {/* Hình ảnh sản phẩm */}
+                            {item.gift_image ? (
+                              <img
+                                src={item.gift_image}
+                                alt={item.gift_name}
+                                className={`w-full h-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-sm mix-blend-multiply ${
+                                  isFull ? "grayscale-[0.8]" : ""
+                                }`}
+                              />
+                            ) : (
+                              <Gift
+                                className="w-16 h-16 text-slate-300/50"
+                                strokeWidth={1}
+                              />
+                            )}
+
+                            {/* Icon Trophy trang trí mờ nền */}
+                            <Trophy className="absolute -bottom-4 -right-4 w-24 h-24 text-slate-200/20 -rotate-12" />
+                          </div>
+
+                          {/* --- Phần Nội Dung --- */}
+                          <CardHeader className="p-4 pb-2 flex-1 space-y-1">
+                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                              <Hash className="w-3 h-3" />
+                              {item.gift_code}
+                            </div>
+                            <CardTitle
+                              className={`text-base font-bold leading-tight line-clamp-2 ${
+                                isFull
+                                  ? "text-muted-foreground"
+                                  : "text-slate-800"
+                              }`}
+                              title={item.gift_name}
+                            >
+                              {item.gift_name}
+                            </CardTitle>
+                          </CardHeader>
+
+                          {/* --- Phần Footer Thống Kê --- */}
+                          <CardFooter className="p-4 pt-2 bg-slate-50/50 mt-auto border-t border-slate-50">
+                            <div className="w-full space-y-3">
+                              {/* Thông số Counter / Limit */}
+                              <div className="flex items-end justify-between">
+                                <div className="text-xs text-muted-foreground font-medium">
+                                  Tiến độ trao giải
+                                </div>
+                                <div className="text-right">
+                                  <span
+                                    className={`text-sm font-bold tabular-nums ${
+                                      isFull
+                                        ? "text-neutral-500"
+                                        : "text-slate-900"
+                                    }`}
+                                  >
+                                    {item.counter}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground ml-1">
+                                    / {item.limits}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Thanh Progress Bar với hiệu ứng Gradient */}
+                              <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-700 ease-out shadow-sm ${progressColor}`}
+                                  style={{
+                                    width: `${Math.min(percent, 100)}%`,
+                                  }}
+                                />
+                              </div>
+
+                              {/* Cảnh báo nếu sắp hết quà */}
+                              {!isFull && percent > 90 && (
+                                <div className="flex items-center gap-1 text-[10px] text-red-600 font-medium animate-pulse">
+                                  <AlertCircle className="w-3 h-3" />
+                                  Sắp hết quà!
+                                </div>
+                              )}
+                            </div>
+                          </CardFooter>
+                        </Card>
+                      );
+                    })}
+
+                    {/* Empty State đẹp hơn */}
+                    {(!gifts || gifts.length === 0) && (
+                      <div className="col-span-full flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
+                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                          <Gift className="h-8 w-8 text-slate-300" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-900">
+                          Danh sách trống
+                        </h3>
+                        <p className="text-sm text-slate-500">
+                          Chưa có giải thưởng nào được thiết lập cho chiến dịch
+                          này.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
                 <TabsContent value="stage" className="mt-4">
                   <div className="grid xl:grid-cols-3 gap-5">
                     <Card className="xl:col-span-2">
@@ -472,26 +629,30 @@ export default function ControlPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {winners.map((w, idx) => (
-                            <tr key={w.id} className="border-t">
+                          {histories?.map((w, idx) => (
+                            <tr key={idx} className="border-t">
                               <td className="p-3">{idx + 1}</td>
                               <td className="p-3 font-mono tabular-nums">
-                                {w.luckyNumber ?? "—"}
+                                {w.number ?? "—"}
                               </td>
                               <td className="p-3">
-                                {w.image ? (
+                                {w.gift_image ? (
                                   <img
-                                    src={w.image}
+                                    src={w.gift_image}
                                     className="h-8 w-8 rounded object-cover"
                                   />
                                 ) : (
                                   "—"
                                 )}
                               </td>
-                              <td className="p-3 font-medium">{w.prizeId}</td>
-                              <td className="p-3">{w?.prizeLabel ?? "—"}</td>
-                              <td className="p-3 font-mono">{w.phone}</td>
-                              <td className="p-3">{w.name ?? "—"}</td>
+                              <td className="p-3 font-medium">
+                                {w.award_name}
+                              </td>
+                              <td className="p-3">{w?.gift_name ?? "—"}</td>
+                              <td className="p-3 font-mono">
+                                {w.consumer_phone}
+                              </td>
+                              <td className="p-3">{w.consumer_name ?? "—"}</td>
                               <td className="p-3">
                                 {new Date(w.time).toLocaleString()}
                               </td>
