@@ -22,6 +22,7 @@ import { useDrawStore } from "@/lib/store";
 import { isSpecial } from "@/lib/utils";
 import { ParticipantsTable } from "./components/participants-table";
 import { DigitSelects } from "./components/digit-selects";
+import { useGetListCustomerCampaign } from "@/react-query/queries/campaign/campaign";
 
 type Participant = { id: string; name?: string; phone: string; count: number };
 
@@ -57,8 +58,6 @@ function SummaryCard({
   display: string;
   history: string[];
 }) {
-  const [digitCount, setDigitCount] = useState(3);
-
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -110,9 +109,12 @@ export default function ControlPage() {
   const program = programs?.find((p) => p.id === programId);
   const themeKey = program?.status as keyof typeof THEMES;
   const isCage = program?.type === "cage";
+  const { data: customers, isPending: isLoadingListCustomer } =
+    useGetListCustomerCampaign({
+      campaignCode: program?.code || "",
+    });
 
   const prizes = useDrawStore((s) => s.prizes);
-  const participants = useDrawStore((s) => s.participants) as Participant[];
   const winners = useDrawStore((s) => s.winners);
   const drawByRandom = useDrawStore((s) => s.drawByRandom);
   const showCage = useDrawStore((s) => s.showCage);
@@ -306,62 +308,16 @@ export default function ControlPage() {
                   <div className="grid md:grid-cols-3 gap-4">
                     <div className="md:col-span-2">
                       <ParticipantsTable
-                        participants={[
-                          {
-                            id: crypto.randomUUID(),
-                            name: "Nguyễn An",
-                            phone: "0912345678",
-                            count: 3,
-                            luckies: ["00001", "00045", "00078"],
-                          },
-                          {
-                            id: crypto.randomUUID(),
-                            name: "Trần Bình",
-                            phone: "0988888888",
-                            count: 2,
-                            luckies: ["11111", "22222"],
-                          },
-                          {
-                            id: crypto.randomUUID(),
-                            name: "Lê Chi",
-                            phone: "0909123456",
-                            count: 4,
-                            luckies: ["33333", "44444", "55555", "66666"],
-                          },
-                          {
-                            id: crypto.randomUUID(),
-                            name: "Phạm Dũng",
-                            phone: "0977777777",
-                            count: 1,
-                            luckies: ["77777"],
-                          },
-                        ]}
-                        winners={[
-                          {
-                            id: crypto.randomUUID(),
-                            time: Date.now() - 1000 * 60 * 5,
-                            prizeLabel: "Giải Nhất",
-                            name: "Nguyễn An",
-                            phone: "0912345678",
-                            luckyNumber: "00045",
-                          },
-                          {
-                            id: crypto.randomUUID(),
-                            time: Date.now() - 1000 * 60 * 3,
-                            prizeLabel: "Giải Nhì",
-                            name: "Lê Chi",
-                            phone: "0909123456",
-                            luckyNumber: "44444",
-                          },
-                          {
-                            id: crypto.randomUUID(),
-                            time: Date.now() - 1000 * 60 * 1,
-                            prizeLabel: "Giải Khuyến Khích",
-                            name: "Phạm Dũng",
-                            phone: "0977777777",
-                            luckyNumber: "77777",
-                          },
-                        ]}
+                        participants={
+                          customers?.map((item) => ({
+                            name: item.consumer_name,
+                            phone: item.consumer_phone,
+                            id: item.campaign_code,
+                            number_counter: item.number_counter,
+                            number_get: item.number_get,
+                          })) || []
+                        }
+                        code={program?.code || ""}
                       />
                     </div>
                     <div>
@@ -374,7 +330,7 @@ export default function ControlPage() {
                           <div className="flex justify-between">
                             <span>Người tham gia</span>
                             <span className="font-semibold">
-                              {participants.length}
+                              {customers?.length || 0}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -456,7 +412,7 @@ export default function ControlPage() {
                     />
                   </div>
                   <div className="mt-6">
-                    <WinnersTicker items={winners} dot={THEMES[themeKey].dot} />
+                    <WinnersTicker items={winners} dot={THEMES[1].dot} />
                   </div>
                 </TabsContent>
 

@@ -11,7 +11,15 @@ export default function HomePage() {
   return (
     <Shell>
       <main className="container mx-auto px-4 py-6 space-y-6">
-        <ProgramInfo program={program} themeKey={themeKey} />
+        {program && (
+          <ProgramInfo
+            program={{
+              ...program,
+              type: "cage",
+            }}
+            themeKey={themeKey}
+          />
+        )}
       </main>
     </Shell>
   );

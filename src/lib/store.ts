@@ -6,8 +6,8 @@ export type Participant = {
   id: string;
   name?: string;
   phone: string;
-  count: number;
-  luckies: string[];
+  number_counter: number;
+  number_get: number;
 };
 
 const samplePrizes: Prize[] = [
@@ -75,47 +75,6 @@ const samplePrizes: Prize[] = [
   { id: crypto.randomUUID(), label: "Áo thun kỷ niệm", count: 30, tier: "C" },
 ];
 
-const sampleParticipants: Participant[] = Array.from({ length: 80 }).map(
-  (_, i) => {
-    const names = [
-      "Nguyễn An",
-      "Trần Bình",
-      "Lê Chi",
-      "Phạm Dũng",
-      "Võ Em",
-      "Bùi Gia",
-      "Đoàn Hà",
-      "Hồ Khang",
-      "Phan Linh",
-      "Đặng Minh",
-      "Đỗ Ngân",
-      "Huỳnh Phúc",
-      "Lý Quân",
-      "Trịnh Sơn",
-      "Tạ Trâm",
-      "Phùng Uyên",
-      "Cao Vy",
-      "Đinh Yến",
-    ];
-    const name = names[i % names.length] + " " + (i + 1);
-    const phone = "09" + String(10000000 + i * 317).slice(0, 8);
-    const count = Math.floor(Math.random() * 5) + 1;
-
-    // 🎯 Generate random 5-digit lucky numbers
-    const luckies = Array.from({ length: count }).map(() =>
-      String(Math.floor(Math.random() * 100000)).padStart(5, "0")
-    );
-
-    return {
-      id: crypto.randomUUID(),
-      name,
-      phone,
-      count,
-      luckies,
-    };
-  }
-);
-
 export type DrawState = {
   programs: TCampaign[];
   programId: number;
@@ -144,7 +103,7 @@ export const useDrawStore = create<DrawState & DrawActions>((set, get) => ({
   programs: [],
   programId: -1,
   prizes: samplePrizes,
-  participants: sampleParticipants,
+  participants: [],
   winners: [],
   running: false,
   cageDisplay: "",

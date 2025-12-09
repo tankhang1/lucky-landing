@@ -76,7 +76,7 @@ export default function AudienceDeluxe() {
     () => programs?.find((p) => p.id === programId),
     [programId]
   );
-  const themeKey = program?.status as keyof typeof THEMES;
+  const themeKey = program?.status || (1 as keyof typeof THEMES);
   const winners = useDrawStore((s) => s.winners);
   const prizes = useDrawStore((s) => s.prizes);
 
@@ -235,7 +235,7 @@ export default function AudienceDeluxe() {
             )}
           </motion.div>
 
-          <WinnersTicker items={winners} dot={THEMES[themeKey].dot} />
+          <WinnersTicker items={winners} dot={THEMES[1].dot} />
 
           <div className="rounded-2xl border overflow-hidden bg-white/70 backdrop-blur">
             <div ref={tableWrapRef} className="max-h-[55vh] overflow-auto">
