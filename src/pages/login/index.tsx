@@ -7,23 +7,47 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Logo from "@/assets/logo.png";
-// --- Login Page ---
+import { useLogin } from "@/react-query/queries/auth/auth";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
+// --- Login Page ---
+const loginSchema = z.object({
+  username: z.string().min(1, "Vui lòng nhập tên đăng nhập"),
+  password: z.string().min(1, "Vui lòng nhập mật khẩu"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const { mutate: login, isPending: isLoadingLogin } = useLogin();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ username: "", password: "" });
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate("/main");
-      // alert("Login successful! (Check console)");
-    }, 1500);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+  const handleLogin = (data: LoginFormValues) => {
+    localStorage.clear();
+    login(
+      {
+        username: data.username,
+        password: data.password,
+      },
+      {
+        onSuccess: (value) => {
+          localStorage.setItem("token", value.token);
+          navigate("/main");
+        },
+      }
+    );
   };
 
   return (
@@ -63,7 +87,7 @@ export default function LoginPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="username">Tên đăng nhập</Label>
                 <div className="relative group items-center flex">
@@ -72,13 +96,15 @@ export default function LoginPage() {
                     id="username"
                     placeholder="admin@mappacific.com"
                     className="pl-10"
-                    value={formData.username}
-                    onChange={(e) =>
-                      setFormData({ ...formData, username: e.target.value })
-                    }
                     required
+                    {...register("username")}
                   />
                 </div>
+                {errors.username && (
+                  <p className="text-xs text-destructive font-medium">
+                    {errors.username.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -92,11 +118,8 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     className="pl-10 pr-10"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
                     required
+                    {...register("password")}
                   />
                   <button
                     type="button"
@@ -110,14 +133,20 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-xs text-destructive font-medium">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               <Button
                 type="submit"
                 className="w-full text-base group"
-                disabled={isLoading}
+                disabled={isLoadingLogin}
+                onClick={handleSubmit(handleLogin)}
               >
-                {isLoading ? (
+                {isLoadingLogin ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 ) : (
                   <>
@@ -126,7 +155,7 @@ export default function LoginPage() {
                   </>
                 )}
               </Button>
-            </form>
+            </div>
 
             {/* Footer */}
             <div className="text-center text-xs text-muted-foreground pt-4 border-t border-border">

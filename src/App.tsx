@@ -5,7 +5,7 @@ import AudiencePage from "./pages/audience/page";
 import CageControlPage from "./components/cage/control/page";
 import CageAudiencePage from "./components/cage/audience/page";
 import { QueryClientProvider } from "@tanstack/react-query";
-import queryClient from "./query";
+import queryClient from "./react-query";
 import LoginPage from "./pages/login";
 
 export default function App() {
