@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { DEMO_PROGRAMS, type Prize, type Winner } from "./type";
+import type { TCampaign } from "@/react-query/services/campaign/campaign.service";
 
 export type Participant = {
   id: string;
@@ -116,7 +117,8 @@ const sampleParticipants: Participant[] = Array.from({ length: 80 }).map(
 );
 
 export type DrawState = {
-  programId: string;
+  programs: TCampaign[];
+  programId: number;
   prizes: Prize[];
   participants: Participant[];
   winners: Winner[];
@@ -126,7 +128,8 @@ export type DrawState = {
 };
 
 export type DrawActions = {
-  setProgramId: (id: string) => void;
+  setProgram: (programs: TCampaign[]) => void;
+  setProgramId: (id: number) => void;
   addPrize: (p: Omit<Prize, "id">) => void;
   removePrize: (id: string) => void;
   addParticipant: (p: Omit<Participant, "id">) => void;
@@ -138,14 +141,15 @@ export type DrawActions = {
 };
 
 export const useDrawStore = create<DrawState & DrawActions>((set, get) => ({
-  programId: DEMO_PROGRAMS[0].id,
+  programs: [],
+  programId: -1,
   prizes: samplePrizes,
   participants: sampleParticipants,
   winners: [],
   running: false,
   cageDisplay: "",
   cageHistory: [],
-
+  setProgram: (programs) => set({ programs: programs }),
   setProgramId: (id) => set({ programId: id }),
   addPrize: (p) =>
     set((s) => ({ prizes: [...s.prizes, { ...p, id: crypto.randomUUID() }] })),

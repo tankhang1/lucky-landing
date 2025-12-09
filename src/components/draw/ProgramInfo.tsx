@@ -1,12 +1,14 @@
-import { Card, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { THEMES, type Program } from "@/lib/type";
+import { THEMES } from "@/lib/type";
+import type { TCampaign } from "@/react-query/services/campaign/campaign.service";
+import { CalendarClock } from "lucide-react";
 
 export default function ProgramInfo({
   program,
   themeKey,
 }: {
-  program?: Program;
+  program?: TCampaign;
   themeKey: keyof typeof THEMES;
 }) {
   if (!program) return null;
@@ -14,10 +16,10 @@ export default function ProgramInfo({
     <Card className="overflow-hidden border-0 shadow-lg ring-2 ring-primary/20">
       <div className="grid lg:grid-cols-[380px_1fr]">
         <div className="relative">
-          {program.banner ? (
+          {program.image_banner ? (
             <img
-              src={program.banner}
-              alt={program.title}
+              src={program.image_banner}
+              alt={program.name}
               className="h-full w-full object-cover"
             />
           ) : (
@@ -29,14 +31,18 @@ export default function ProgramInfo({
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <Badge
               variant={
-                program.status === "open"
+                program.status === 1
                   ? "default"
-                  : program.status === "upcoming"
-                  ? "secondary"
-                  : "outline"
+                  : program.status === 2
+                  ? "outline"
+                  : "secondary"
               }
             >
-              {program.status}
+              {program.status === 1
+                ? "Đang diễn ra"
+                : program.status === 2
+                ? "Kết thúc"
+                : "Sắp diễn ra"}
             </Badge>
             <Badge variant="outline">{program.code}</Badge>
             <Badge>{program.type === "cage" ? "Lồng cầu" : "Online"}</Badge>
@@ -44,23 +50,21 @@ export default function ProgramInfo({
           <div
             className={`text-2xl font-extrabold bg-clip-text text-transparent ${THEMES[themeKey].title}`}
           >
-            {program.title}
+            {program.name}
           </div>
-          {program.description ? (
-            <CardDescription className="mt-1">
-              {program.description}
-            </CardDescription>
-          ) : null}
-          {program.rules?.length ? (
-            <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-sm">
-              {program.rules.map((r, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
-                  <span>{r}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          {program.description_short && (
+            <div className="relative mt-auto pt-5 border-t border-border/40">
+              <div className="flex items-start gap-2 text-sm text-muted-foreground/80">
+                <CalendarClock className="w-4 h-4 mt-0.5 shrink-0 text-primary/60" />
+                <div
+                  className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0 [&>p]:leading-normal"
+                  dangerouslySetInnerHTML={{
+                    __html: program.description_short,
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Card>

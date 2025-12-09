@@ -9,14 +9,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDrawStore } from "@/lib/store";
-import { DEMO_PROGRAMS, THEMES } from "@/lib/type";
+import { THEMES } from "@/lib/type";
 import { Link } from "react-router-dom";
 import Logo from "@/assets/logo.png";
+import { useGetListCampaign } from "@/react-query/queries/campaign/campaign";
+import Loading from "@/assets/loading.gif";
+import { useEffect } from "react";
 export default function Shell({ children }: { children: React.ReactNode }) {
+  const { data: programs, isPending: isLoadingProgram } = useGetListCampaign();
   const programId = useDrawStore((s) => s.programId);
   const setProgramId = useDrawStore((s) => s.setProgramId);
-  const themeKey = (DEMO_PROGRAMS.find((p) => p.id === programId)?.theme ??
-    "tet") as keyof typeof THEMES;
+  const setProgram = useDrawStore((s) => s.setProgram);
+  const themeKey = (programs?.find((p) => p.id === programId)?.status ??
+    1) as keyof typeof THEMES;
+  useEffect(() => {
+    if (programs && programs.length > 0) {
+      setProgram(programs);
+      setProgramId(programs[0].id);
+    }
+  }, [programs]);
   return (
     <div className={`min-h-screen ${THEMES[themeKey].pageBg}`}>
       <header className="sticky top-0 z-20 border-b bg-gradient-to-r from-white/70 to-white/70 backdrop-blur">
@@ -29,28 +40,41 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3">
-            <Select value={programId} onValueChange={setProgramId}>
+            <Select
+              value={programId.toString()}
+              onValueChange={(value) => setProgramId(+value)}
+            >
               <SelectTrigger className="w-72">
                 <SelectValue placeholder="Chọn chương trình" />
               </SelectTrigger>
               <SelectContent>
-                {DEMO_PROGRAMS.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
+                {isLoadingProgram && (
+                  <div className="flex justify-center items-center">
+                    <img src={Loading} className="w-7" />
+                  </div>
+                )}
+
+                {programs?.map((p) => (
+                  <SelectItem key={p.id} value={p.id.toString()}>
                     <div className="flex items-center gap-2">
                       <Badge
                         variant={
-                          p.status === "open"
+                          p.status === 1
                             ? "default"
-                            : p.status === "upcoming"
+                            : p.status === 2
                             ? "secondary"
                             : "outline"
                         }
                       >
-                        {p.status}
+                        {p.status === 1
+                          ? "Đang hoạt động"
+                          : p.status === 2
+                          ? "Kết thúc"
+                          : "Sắp diễn ra"}
                       </Badge>
-                      <span>{p.title}</span>
+                      <span>{p.name}</span>
                       <Badge variant="outline">
-                        {p.type === "cage" ? "Lồng cầu" : "Online"}
+                        {p?.type === "cage" ? "Lồng cầu" : "Online"}
                       </Badge>
                     </div>
                   </SelectItem>
