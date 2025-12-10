@@ -27,10 +27,9 @@ import {
   useGetListGiftCampaign,
   useGetListLuckyHistory,
   useRequestLuckyManual,
+  useRequestPublishEvent,
 } from "@/react-query/queries/campaign/campaign";
 import { Badge } from "@/components/ui/badge";
-import SockJS from "sockjs-client";
-import Stomp, { Client, Frame } from "stompjs";
 function CagePreview({
   value,
   count = 5,
@@ -115,9 +114,8 @@ function SummaryCard({
 }
 
 export default function ControlPage() {
-  const [stompClient, setStompClient] = useState<Client | null>(null);
   const [digitCount, setDigitCount] = useState(3);
-  const [selectedPrizeId, setSelectedPrizeId] = useState("p1");
+  const [selectedPrizeId, setSelectedPrizeId] = useState("");
   const programs = useDrawStore((s) => s.programs);
   const programId = useDrawStore((s) => s.programId);
   const program = programs?.find((p) => p.id === programId);
@@ -134,7 +132,7 @@ export default function ControlPage() {
   });
   const { mutate: requestLucky, isPending: isLoadingRequest } =
     useRequestLuckyManual();
-
+  const { mutate: requestPublishEvent } = useRequestPublishEvent();
   const prizes = useDrawStore((s) => s.prizes);
   const setPrize = useDrawStore((s) => s.setPrize);
   const winners = useDrawStore((s) => s.winners);
@@ -160,33 +158,7 @@ export default function ControlPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isCage, drawByRandom]);
-  useEffect(() => {
-    const url = "wss://mps-api.vmarketing.vn/socket";
-    // Kết nối đến Endpoint (Lưu ý: check kỹ config Java bên server)
-    const stompClient = Stomp.client(url); // Tắt log debug rác nếu muốn gọn console
-    // client.debug = () => {};
-    stompClient.debug = (str) => console.log(str);
-    stompClient.connect(
-      {}, // Headers (nếu cần auth token thì bỏ vào đây: { Authorization: 'Bearer ...' })
-      (frame: Frame | undefined) => {
-        console.log("Connected: " + frame);
-      },
-      (error: string | Frame) => {
-        console.error("Connection error:", error);
-      }
-    );
 
-    setStompClient(stompClient);
-
-    // Cleanup khi component unmount
-    return () => {
-      if (stompClient && stompClient.connected) {
-        stompClient.disconnect(() => {
-          console.log("Disconnected");
-        });
-      }
-    };
-  }, []);
   const getProgressColor = (percent: number, isFull: boolean) => {
     if (isFull) return "bg-neutral-400"; // Hết quà: Màu xám
     if (percent > 90) return "bg-red-500"; // Sắp hết: Màu đỏ
@@ -204,16 +176,11 @@ export default function ControlPage() {
       gift_code: selectedPrizeId,
       numb: +cage,
     });
-    const payload = {
-      campaign_code: program.code,
-      gift_code: selectedPrizeId,
-      numb: +cage,
-    };
-    stompClient?.send("/campaign/update-award", {}, JSON.stringify(payload));
+    const [gift_code, award_name] = selectedPrizeId.split("_");
     requestLucky(
       {
         campaign_code: program.code,
-        gift_code: selectedPrizeId,
+        gift_code: gift_code,
         numb: +cage,
       },
       {
@@ -221,8 +188,19 @@ export default function ControlPage() {
           showCage(normalized);
           showHistoryCage(normalized);
           setCage("");
-          //@ts-expect-error
-          alert(res.message);
+          requestPublishEvent({
+            type: program.type,
+            data: JSON.stringify({
+              campaign_code: program.code,
+              gift_code: gift_code,
+              numb: +cage,
+              award_name: award_name,
+              type: program.type,
+            }),
+          });
+
+          //@ts-expect-error no check
+          alert(res?.message);
         },
         onError: () => {
           alert("Nhập số thất bại");

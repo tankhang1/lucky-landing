@@ -34,7 +34,7 @@ export default function Fullscreen({
   };
   return (
     <FullscreenCtx.Provider value={ref}>
-      <div ref={ref} className="relative h-screen">
+      <div ref={ref} className="w-screen h-screen">
         <Button
           variant="ghost"
           size="icon"

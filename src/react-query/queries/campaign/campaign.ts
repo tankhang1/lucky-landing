@@ -6,6 +6,7 @@ import {
   getListCustomerCampaign,
   getListGiftCampaign,
   requestLuckyManual,
+  requestPublishEvent,
   type TGetCampaignDetailNumberReq,
   type TGetCampaignDetailNumberRes,
   type TGetListCampaignLuckyHistoryReq,
@@ -15,6 +16,7 @@ import {
   type TGetListCustomerCampaignRes,
   type TGetListGiftCampaignReq,
   type TGetListGiftCampaignRes,
+  type TPublishEventReq,
   type TRequestLuckyManualReq,
   type TRequestLuckyManualRes,
 } from "@/react-query/services/campaign/campaign.service";
@@ -88,5 +90,11 @@ export const useGetListLuckyHistory = (
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
+  });
+};
+
+export const useRequestPublishEvent = () => {
+  return useMutation<void, AxiosError<null>, TPublishEventReq>({
+    mutationFn: requestPublishEvent,
   });
 };

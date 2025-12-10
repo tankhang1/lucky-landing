@@ -1,20 +1,26 @@
 // components/draw/FiveDigitJackpot.tsx
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import useSound from "use-sound";
 import confetti from "canvas-confetti";
+import { motion, AnimatePresence } from "framer-motion"; // Make sure to install framer-motion
 import { useDrawStore } from "@/lib/store";
 import DigitReel from "./digit-flip";
 import { useFullscreenContainer } from "@/components/draw/Fullscreen";
 import { Button } from "./ui/button";
+import { Trophy, Gift, X } from "lucide-react";
 
 export default function FiveDigitJackpot({
   size = 160,
   isControl = false,
+  number,
+  type,
 }: {
   size?: number;
   isControl?: boolean;
+  number: string;
+  type: string;
 }) {
   const prizes = useDrawStore((s) => s.prizes);
   const winners = useDrawStore((s) => s.winners);
@@ -24,66 +30,27 @@ export default function FiveDigitJackpot({
   const [stopNumbers, setStopNumbers] = useState<number[]>([0, 0, 0, 0, 0]);
   const [open, setOpen] = useState(false);
 
+  // Sounds
   const [playSpin, { stop: stopSpin }] = useSound(
     "/sound/running-jackpot.mp3",
     { volume: 1, loop: true }
   );
   const [playDing] = useSound("/sound/ding.mp3", { volume: 0.8 });
+  const [playWin] = useSound("/sound/win.mp3", { volume: 0.6 }); // Optional: Add a win sound
 
   const allStopped = active.every((a) => !a);
   const numberStr = stopNumbers.join("");
-
-  // === fullscreen container & confetti instance inside it ===
   const fsRef = useFullscreenContainer();
-  const confettiApi = useRef<ReturnType<typeof confetti.create> | null>(null);
-  const confettiCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  useEffect(() => {
-    if (!fsRef?.current) return;
-
-    if (open) {
-      const cnv = document.createElement("canvas");
-      confettiCanvasRef.current = cnv;
-
-      Object.assign(cnv.style, {
-        position: "fixed", // sits in the fullscreen top layer
-        inset: "0",
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        // Higher than your Dialog.Content/Overlay (which are typically ~1000–1002)
-        zIndex: "10050",
-      });
-
-      // Append AFTER Dialog.Portal renders so the canvas is on top
-      fsRef.current.appendChild(cnv);
-      confettiApi.current = confetti.create(cnv, {
-        resize: true,
-        useWorker: true,
-      });
-
-      return () => {
-        confettiApi.current = null;
-        cnv.remove();
-        confettiCanvasRef.current = null;
-      };
-    } else {
-      // if the dialog closes, tear down
-      if (confettiCanvasRef.current) {
-        confettiCanvasRef.current.remove();
-        confettiCanvasRef.current = null;
-        confettiApi.current = null;
-      }
-    }
-  }, [open, fsRef]);
-
+  // --- Logic: Start/Stop ---
   const startAll = () => {
     playSpin();
-    setActive(Array(5).fill(true));
+    setActive(Array(number.length).fill(true));
   };
+
   const stopAll = () => {
     stopSpin();
-    Array.from({ length: 5 }).forEach((_, i) => {
+    Array.from({ length: number.length }).forEach((_, i) => {
       setTimeout(() => {
         setActive((prev) => prev.map((v, idx) => (idx === i ? false : v)));
         setStopNumbers((prev) =>
@@ -93,28 +60,74 @@ export default function FiveDigitJackpot({
     });
   };
 
+  // Sync props
   useEffect(() => {
-    if (allStopped) {
+    playSpin();
+    setActive(Array(number.length).fill(true));
+    setStopNumbers(number?.split("")?.map((item) => +item));
+  }, [number]);
+
+  // Handle Auto-Stop based on Type
+  useEffect(() => {
+    if (!type) return;
+    if (type === "0") {
+      setTimeout(() => stopAll(), 2000);
+    }
+  }, [type]);
+
+  // --- Logic: Win Condition ---
+  useEffect(() => {
+    if (allStopped && !allStopped) {
       stopSpin();
       playDing();
 
       const prizeIdx = prizes.length ? 0 : -1;
-      if (prizeIdx >= 0) addWinnerFromJackpot(prizeIdx);
-      setOpen(true);
-      requestAnimationFrame(() => {
-        confettiApi.current?.({
-          particleCount: 180,
-          spread: 90,
-          origin: { y: 0.28 },
-        });
-      });
+      if (prizeIdx >= 0) {
+        addWinnerFromJackpot(prizeIdx);
+        // Delay opening slightly to let the "Ding" sink in
+        setTimeout(() => {
+          setOpen(true);
+          playWin();
+          triggerConfetti();
+        }, 500);
+      }
     }
-  }, [allStopped, playDing, stopSpin, prizes.length, addWinnerFromJackpot]);
+  }, [allStopped, prizes.length, addWinnerFromJackpot]);
+
+  // --- Helper: Confetti ---
+  const triggerConfetti = () => {
+    const duration = 3000;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        zIndex: 99999, // Ensure it's above the dialog
+      });
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        zIndex: 99999,
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+    frame();
+  };
+
   return (
     <div className="w-full">
-      <div className="relative overflow-hidden-6">
+      {/* --- REELS --- */}
+      <div className="relative overflow-hidden p-6">
         <div className="relative flex flex-col items-center gap-6">
-          <div className="flex gap-3 md:gap-4">
+          <div className="flex justify-center gap-2 sm:gap-4 flex-wrap">
             {active.map((isActive, i) => (
               <DigitReel
                 key={i}
@@ -132,7 +145,7 @@ export default function FiveDigitJackpot({
             ))}
           </div>
           {isControl && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-4">
               <Button onClick={startAll} disabled={active.every(Boolean)}>
                 Bắt đầu
               </Button>
@@ -148,72 +161,117 @@ export default function FiveDigitJackpot({
         </div>
       </div>
 
-      {/* Dialog rendered INTO fullscreen container */}
-      <Dialog.Root open={open} onOpenChange={setOpen}>
-        <Dialog.Portal container={fsRef?.current ?? undefined}>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out z-[1001]" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 w-[92vw] max-w-[720px] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-background p-6 shadow-lg outline-none z-[1002] data-[state=open]:animate-in data-[state=closed]:animate-out">
-            <Dialog.Title className="text-lg font-semibold">
-              Kết quả – Số: {numberStr}
-            </Dialog.Title>
+      {/* --- DIALOG (RESULT) --- */}
+      <Dialog.Root
+        open={allStopped}
+        onOpenChange={() => setActive(Array(number.length).fill(true))}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay
+            forceMount
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1001] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+          />
 
-            {winners[0] ? (
-              <div className="mt-4 grid grid-cols-[120px_1fr] gap-4 items-center">
-                <div>
-                  {winners[0].image ? (
-                    <img src={winners[0].image} className="h-24 w-24" />
-                  ) : (
-                    <div className="h-24 w-24 rounded-xl bg-muted" />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-base">
-                  <div className="opacity-70">Giải</div>
-                  <div className="font-semibold">{winners[0].prizeLabel}</div>
-                  <div className="opacity-70">Tên</div>
-                  <div className="font-semibold">{winners[0].name ?? "—"}</div>
-                  <div className="opacity-70">SĐT</div>
-                  <div className="font-mono">{winners[0].phone}</div>
-                  <div className="opacity-70">Thời gian</div>
-                  <div>{new Date(winners[0].time).toLocaleString()}</div>
-                </div>
-              </div>
-            ) : (
-              <div className="mt-4 text-muted-foreground">
-                Không có người trúng hoặc hết giải.
-              </div>
-            )}
+          <Dialog.Content
+            forceMount
+            className="fixed left-1/2 top-1/2 w-[95vw] max-w-[800px] -translate-x-1/2 -translate-y-1/2 outline-none z-[1002]"
+          >
+            <AnimatePresence>
+              {allStopped && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                  className="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden border border-white/20"
+                >
+                  {/* Close Button */}
+                  <Dialog.Close className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/5 transition-colors z-10">
+                    <X className="w-6 h-6 text-slate-400" />
+                  </Dialog.Close>
 
-            <div className="mt-6">
-              <div className="text-sm font-semibold mb-2">
-                Danh sách giải còn lại
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {prizes.map((pr) => (
-                  <div
-                    key={pr.id}
-                    className="rounded-xl border p-3 bg-card/50 flex items-center gap-3"
-                  >
-                    {pr.image ? (
-                      <img
-                        src={pr.image}
-                        className="h-10 w-10 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="h-10 w-10 rounded bg-muted" />
-                    )}
-                    <div className="flex-1">
-                      <div className="font-medium leading-tight">
-                        {pr.label}
-                      </div>
-                      <div className="text-xs opacity-70">x{pr.count}</div>
+                  <div className="flex flex-col items-center p-8 pb-12">
+                    {/* Header */}
+                    <div className="flex items-center gap-2 text-amber-500 font-bold uppercase tracking-widest text-sm mb-6">
+                      <Trophy className="w-5 h-5" />
+                      <div>Chúc mừng chiến thắng</div>
+                      <Trophy className="w-5 h-5" />
                     </div>
+
+                    {/* BIG WINNING NUMBER */}
+                    <motion.div
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 15,
+                        delay: 0.2,
+                      }}
+                      className="relative z-10"
+                    >
+                      {/* Glow Effect behind number */}
+                      <div className="absolute inset-0 bg-amber-400/30 blur-[60px] rounded-full" />
+
+                      <motion.h2
+                        // The Heartbeat / Zoom In-Out Effect
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 2,
+                          ease: "easeInOut",
+                          delay: 1,
+                        }}
+                        className="relative text-[120px] sm:text-[150px] font-black leading-none bg-gradient-to-br from-amber-400 via-orange-500 to-red-600 bg-clip-text text-transparent drop-shadow-sm"
+                        style={{ fontVariantNumeric: "tabular-nums" }}
+                      >
+                        {numberStr}
+                      </motion.h2>
+                    </motion.div>
+
+                    {/* WINNER DETAILS CARD */}
+                    {winners[0] ? (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="mt-8 w-full max-w-md bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 flex items-center gap-4 border border-slate-100 dark:border-slate-700"
+                      >
+                        <div className="relative shrink-0">
+                          {winners[0].image ? (
+                            <img
+                              src={winners[0].image}
+                              className="h-20 w-20 rounded-xl object-cover shadow-sm ring-2 ring-white"
+                            />
+                          ) : (
+                            <div className="h-20 w-20 rounded-xl bg-slate-200 flex items-center justify-center">
+                              <Gift className="w-8 h-8 text-slate-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs text-slate-500 uppercase font-semibold mb-1">
+                            Người trúng giải
+                          </div>
+                          <div className="text-xl font-bold truncate text-slate-800 dark:text-slate-100">
+                            {winners[0].name || "Khách hàng"}
+                          </div>
+                          <div className="text-slate-500 font-mono text-sm">
+                            {winners[0].phone}
+                          </div>
+                          <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                            {winners[0].prizeLabel}
+                          </div>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <div className="mt-8 text-slate-400 italic">
+                        Đang cập nhật người trúng...
+                      </div>
+                    )}
                   </div>
-                ))}
-                {!prizes.length && (
-                  <div className="text-sm text-muted-foreground">Hết giải.</div>
-                )}
-              </div>
-            </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

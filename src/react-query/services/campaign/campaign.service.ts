@@ -150,3 +150,25 @@ export const getListCampaignLuckyHistory = async (
   });
   return data;
 };
+
+export type TPublishEventReq = {
+  type: number;
+  data: string;
+};
+
+export type TReceiveEvent = {
+  campaign_code: string;
+  gift_code: string;
+  numb: string;
+  award_name: string;
+  type: string;
+};
+
+export const requestPublishEvent = async (
+  params: TPublishEventReq
+): Promise<void> => {
+  const { data } = await api.get(PATH.CAMPAIGN.PUBLISH_EVENT, {
+    params,
+  });
+  return data;
+};

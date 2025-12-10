@@ -70,7 +70,10 @@ export function DigitSelects({
             </SelectTrigger>
             <SelectContent>
               {prizes.map((p) => (
-                <SelectItem key={p.gift_code} value={p.gift_code.toString()}>
+                <SelectItem
+                  key={`${p.gift_code}_${p.award_name}`}
+                  value={`${p.gift_code}_${p.award_name}`}
+                >
                   {p.gift_name} (SL: {p.counter}/{p.limits})
                 </SelectItem>
               ))}

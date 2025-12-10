@@ -20,73 +20,22 @@ import {
   useGetListGiftCampaign,
   useGetListLuckyHistory,
 } from "@/react-query/queries/campaign/campaign";
-
-function PrizeTicker({
-  items,
-}: {
-  items: { label: string; count: number; image?: string }[];
-}) {
-  const list = items.flatMap((p) =>
-    Array.from({ length: p.count }, () => ({ label: p.label, image: p.image }))
-  );
-  if (!list.length) return null;
-
-  return (
-    <div className="absolute bottom-0 inset-x-0 h-16">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-      <div className="h-full overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
-        <motion.div
-          className="flex items-center gap-5 h-full px-10"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ repeat: Infinity, duration: 22, ease: "linear" }}
-          style={{ width: "200%" }}
-        >
-          {[...list, ...list].map((p, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex items-center h-10 px-4 rounded-full border border-white/60 backdrop-blur-md shadow-sm",
-                "bg-gradient-to-br from-white/60 to-white/30 hover:from-white/80 transition-all duration-300",
-                "gap-2"
-              )}
-            >
-              {p.image ? (
-                <div className="flex-shrink-0 h-7 w-7 rounded-full overflow-hidden ring-1 ring-white/50">
-                  <img
-                    src={p.image}
-                    alt={p.label}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ) : (
-                <Gift className="h-5 w-5 text-amber-700/70" />
-              )}
-              <span className="text-[15px] font-semibold text-neutral-800 whitespace-nowrap">
-                {p.label}
-              </span>
-            </div>
-          ))}
-        </motion.div>
-      </div>
-    </div>
-  );
-}
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
+import type { TReceiveEvent } from "@/react-query/services/campaign/campaign.service";
+import PrizeTicker from "./components/PrizeTicker";
 
 export default function AudienceDeluxe() {
   const navigate = useNavigate();
-  const programs = useDrawStore((s) => s.programs);
-  const programId = useDrawStore((s) => s.programId);
-  const program = useMemo(
-    () => programs?.find((p) => p.id === programId),
-    [programId]
+  const [receivedEvent, setReceivedEvent] = useState<TReceiveEvent | null>(
+    null
   );
-  const themeKey = program?.status || (1 as keyof typeof THEMES);
-  const prizes = useDrawStore((s) => s.prizes);
+
   const { data: gifts } = useGetListGiftCampaign({
-    c: program?.code || "",
+    c: receivedEvent?.campaign_code || "",
   });
   const { data: winners } = useGetListLuckyHistory({
-    c: program?.code || "",
+    c: receivedEvent?.campaign_code || "",
   });
   const prevCount = useRef(winners?.length || 0);
   const [flash, setFlash] = useState(false);
@@ -128,7 +77,33 @@ export default function AudienceDeluxe() {
     }
     prevCount.current = winners?.length || 0;
   }, [winners]);
+  useEffect(() => {
+    const socket = new SockJS("https://mps-api.vmarketing.vn/socket");
+    const stompClient = Stomp.over(socket);
 
+    stompClient.connect(
+      {},
+      () => {
+        console.log("Connected");
+        // subscribe / send here
+        stompClient.subscribe("/landingpage/manual/update-award", (message) => {
+          console.log("Received message", message);
+          if (message?.body) {
+            setReceivedEvent(JSON.parse(message.body) as TReceiveEvent);
+          }
+        });
+      },
+      (error) => {
+        console.error("Connection error:", error);
+      }
+    );
+
+    return () => {
+      if (stompClient && stompClient.connected) {
+        stompClient.disconnect(() => console.log("Disconnected"));
+      }
+    };
+  }, []);
   return (
     <div
       ref={containerRef}
@@ -161,13 +136,16 @@ export default function AudienceDeluxe() {
               exit={{ opacity: 0, y: -20 }}
               className="text-center"
             >
-              <div className="text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-neutral-800 to-neutral-600 drop-shadow-sm leading-tight p-2">
-                GIẢI ĐẶC BIỆT
+              <div className="text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-neutral-800 to-neutral-600 drop-shadow-sm leading-tight p-2 uppercase">
+                {receivedEvent?.award_name}
               </div>
             </motion.div>
           </AnimatePresence>
           <div className="rounded-3xl border bg-white/60 backdrop-blur p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]">
-            <FiveDigitJackpot />
+            <FiveDigitJackpot
+              number={receivedEvent?.numb?.toString() || "00000"}
+              type={receivedEvent?.type || ""}
+            />
           </div>
           <div className="text-center text-neutral-700 font-medium">
             Đang chờ thao tác từ màn Control…
@@ -306,11 +284,13 @@ export default function AudienceDeluxe() {
         </div>
 
         <PrizeTicker
-          items={prizes.map((p) => ({
-            label: p.gift_name,
-            count: p.counter,
-            image: p.gift_image,
-          }))}
+          items={
+            gifts?.map((p) => ({
+              label: p.gift_name,
+              count: p.counter,
+              image: p.gift_image,
+            })) || []
+          }
         />
       </div>
     </div>
