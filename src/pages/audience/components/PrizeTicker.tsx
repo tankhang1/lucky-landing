@@ -62,7 +62,7 @@ const PrizeCard = ({ data }: { data: { label: string; image?: string } }) => (
     )}
   >
     {/* Icon / Image Container */}
-    <div className="relative h-10 w-10 flex-shrink-0 rounded-xl bg-gradient-to-br from-indigo-50 to-white flex items-center justify-center overflow-hidden border border-white/50">
+    <div className="relative h-10 w-10 flex-shrink-0 rounded-xs bg-gradient-to-br from-indigo-50 to-white flex items-center justify-center overflow-hidden border border-white/50">
       {data.image ? (
         <img
           src={data.image}
@@ -77,7 +77,7 @@ const PrizeCard = ({ data }: { data: { label: string; image?: string } }) => (
     {/* Text */}
     <div className="flex flex-col justify-center">
       <div className="flex items-center gap-1.5">
-        <span className="text-sm font-bold text-slate-700 leading-none group-hover:text-indigo-600 transition-colors">
+        <span className="text-sm text-nowrap font-bold text-slate-700 leading-none group-hover:text-indigo-600 transition-colors">
           {data.label}
         </span>
         {/* Optional 'New' or 'Win' badge logic could go here */}

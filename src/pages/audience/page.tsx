@@ -1,18 +1,10 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import {
-  ArrowLeft,
-  Crown,
-  Gift,
-  Maximize2,
-  Minimize2,
-  Trophy,
-} from "lucide-react";
+import { ArrowLeft, Crown, Maximize2, Minimize2, Trophy } from "lucide-react";
 import FiveDigitJackpot from "@/components/five-digit-jackpot";
 import WinnersTicker from "@/components/draw/WinnersTicker";
-import { useDrawStore } from "@/lib/store";
 import { THEMES } from "@/lib/type";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -89,6 +81,7 @@ export default function AudienceDeluxe() {
         stompClient.subscribe("/landingpage/manual/update-award", (message) => {
           console.log("Received message", message);
           if (message?.body) {
+            console.log(message.body);
             setReceivedEvent(JSON.parse(message.body) as TReceiveEvent);
           }
         });
@@ -104,6 +97,7 @@ export default function AudienceDeluxe() {
       }
     };
   }, []);
+  console.log("receive", receivedEvent);
   return (
     <div
       ref={containerRef}
@@ -144,7 +138,7 @@ export default function AudienceDeluxe() {
           <div className="rounded-3xl border bg-white/60 backdrop-blur p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]">
             <FiveDigitJackpot
               number={receivedEvent?.numb?.toString() || "00000"}
-              type={receivedEvent?.type || ""}
+              type={receivedEvent?.type?.toString() || ""}
             />
           </div>
           <div className="text-center text-neutral-700 font-medium">

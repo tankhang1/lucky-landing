@@ -7,7 +7,6 @@ import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion"; // Make sure to install framer-motion
 import { useDrawStore } from "@/lib/store";
 import DigitReel from "./digit-flip";
-import { useFullscreenContainer } from "@/components/draw/Fullscreen";
 import { Button } from "./ui/button";
 import { Trophy, Gift, X } from "lucide-react";
 
@@ -32,10 +31,14 @@ export default function FiveDigitJackpot({
   // Sounds
   const [playSpin, { stop: stopSpin }] = useSound(
     "/sound/running-jackpot.mp3",
-    { volume: 1, loop: true }
+    { volume: 1 }
   );
-  const [playDing] = useSound("/sound/ding.mp3", { volume: 0.8 });
-  const [playWin] = useSound("/sound/win.mp3", { volume: 0.6 }); // Optional: Add a win sound
+  const [playDing, { stop: stopDing }] = useSound("/sound/ding.mp3", {
+    volume: 1,
+  });
+  const [playWin, { stop: stopWin }] = useSound("/sound/win.mp3", {
+    volume: 1,
+  }); // Optional: Add a win sound
 
   const allStopped = active.every((a) => !a);
   const numberStr = stopNumbers.join("");
@@ -43,52 +46,44 @@ export default function FiveDigitJackpot({
   // --- Logic: Start/Stop ---
   const startAll = () => {
     playSpin();
+    setTimeout(() => {
+      stopSpin();
+      playDing();
+    }, 1500);
     setActive(Array(number.length).fill(true));
+    setStopNumbers(number?.split("")?.map((item) => +item));
+    if (type === "0") {
+      setTimeout(() => {
+        stopAll();
+      }, 2000);
+    }
   };
 
   const stopAll = () => {
     stopSpin();
+    stopDing();
     Array.from({ length: number.length }).forEach((_, i) => {
       setTimeout(() => {
         setActive((prev) => prev.map((v, idx) => (idx === i ? false : v)));
         setStopNumbers((prev) =>
-          prev.map((v, idx) => (idx === i ? Math.floor(Math.random() * 10) : v))
+          prev.map((v, idx) => (idx === i ? +number[idx] : v))
         );
       }, i * 450);
     });
+    const prizeIdx = prizes.length ? 0 : -1;
+    if (prizeIdx >= 0) {
+      addWinnerFromJackpot(prizeIdx);
+      setTimeout(() => {
+        playWin();
+        triggerConfetti();
+      }, 500);
+    }
   };
 
   // Sync props
   useEffect(() => {
-    playSpin();
-    setActive(Array(number.length).fill(true));
-    setStopNumbers(number?.split("")?.map((item) => +item));
-  }, [number]);
-
-  // Handle Auto-Stop based on Type
-  useEffect(() => {
-    if (!type) return;
-    if (type === "0") {
-      setTimeout(() => stopAll(), 2000);
-    }
-  }, [type]);
-
-  // --- Logic: Win Condition ---
-  useEffect(() => {
-    if (allStopped && !allStopped) {
-      stopSpin();
-      playDing();
-
-      const prizeIdx = prizes.length ? 0 : -1;
-      if (prizeIdx >= 0) {
-        addWinnerFromJackpot(prizeIdx);
-        setTimeout(() => {
-          playWin();
-          triggerConfetti();
-        }, 500);
-      }
-    }
-  }, [allStopped, prizes.length, addWinnerFromJackpot]);
+    startAll();
+  }, [number, type]);
 
   // --- Helper: Confetti ---
   const triggerConfetti = () => {
@@ -117,7 +112,22 @@ export default function FiveDigitJackpot({
     };
     frame();
   };
-
+  useEffect(() => {
+    if (allStopped) {
+      playWin();
+      setTimeout(() => {
+        stopWin();
+      }, 1200);
+      const prizeIdx = prizes.length ? 0 : -1;
+      if (prizeIdx >= 0) {
+        addWinnerFromJackpot(prizeIdx);
+        setTimeout(() => {
+          playWin();
+          triggerConfetti();
+        }, 500);
+      }
+    }
+  }, [allStopped]);
   return (
     <div className="w-full">
       {/* --- REELS --- */}
