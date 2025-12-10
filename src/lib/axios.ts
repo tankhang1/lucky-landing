@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Create the instance
 export const api = axios.create({
-  baseURL: "/api-gateway", // Replace with your Env Variable
+  baseURL: import.meta.env.VITE_API_URL, // Replace with your Env Variable
 });
 
 api.interceptors.request.use((config) => {
