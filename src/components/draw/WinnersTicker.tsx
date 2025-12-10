@@ -1,5 +1,5 @@
 "use client";
-import type { Winner } from "@/lib/type";
+import type { TGetListCampaignLuckyHistoryRes } from "@/react-query/services/campaign/campaign.service";
 import { motion } from "framer-motion";
 import { PartyPopper } from "lucide-react";
 
@@ -7,10 +7,10 @@ export default function WinnersTicker({
   items,
   dot,
 }: {
-  items: Winner[];
+  items?: TGetListCampaignLuckyHistoryRes;
   dot: string;
 }) {
-  if (!items.length) return null;
+  if (!items?.length) return null;
   return (
     <div className="relative overflow-hidden rounded-xl border bg-card/60">
       <div className="absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent pointer-events-none" />
@@ -21,19 +21,19 @@ export default function WinnersTicker({
         className="flex gap-6 whitespace-nowrap p-3 pr-10"
       >
         {[...items, ...items].map((w, i) => (
-          <div key={w.id + i} className="text-sm flex items-center gap-3">
+          <div key={i} className="text-sm flex items-center gap-3">
             <span className={`inline-block h-2 w-2 rounded-full ${dot}`} />
-            {w.image ? (
+            {w.gift_image ? (
               <img
-                src={w.image}
+                src={w.gift_image}
                 alt=""
                 className="h-5 w-5 rounded object-cover"
               />
             ) : (
               <PartyPopper className="w-4 h-4" />
             )}
-            <span className="font-medium">{w.prizeLabel}</span> –{" "}
-            {w.name ?? "—"} ({w.phone})
+            <span className="font-medium">{w.gift_name}</span> –{" "}
+            {w.consumer_name ?? "—"} ({w.consumer_phone})
           </div>
         ))}
       </motion.div>

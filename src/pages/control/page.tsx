@@ -29,7 +29,8 @@ import {
   useRequestLuckyManual,
 } from "@/react-query/queries/campaign/campaign";
 import { Badge } from "@/components/ui/badge";
-
+import SockJS from "sockjs-client";
+import Stomp, { Client, Frame } from "stompjs";
 function CagePreview({
   value,
   count = 5,
@@ -114,6 +115,7 @@ function SummaryCard({
 }
 
 export default function ControlPage() {
+  const [stompClient, setStompClient] = useState<Client | null>(null);
   const [digitCount, setDigitCount] = useState(3);
   const [selectedPrizeId, setSelectedPrizeId] = useState("p1");
   const programs = useDrawStore((s) => s.programs);
@@ -158,6 +160,33 @@ export default function ControlPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isCage, drawByRandom]);
+  useEffect(() => {
+    const url = "wss://mps-api.vmarketing.vn/socket";
+    // Kết nối đến Endpoint (Lưu ý: check kỹ config Java bên server)
+    const stompClient = Stomp.client(url); // Tắt log debug rác nếu muốn gọn console
+    // client.debug = () => {};
+    stompClient.debug = (str) => console.log(str);
+    stompClient.connect(
+      {}, // Headers (nếu cần auth token thì bỏ vào đây: { Authorization: 'Bearer ...' })
+      (frame: Frame | undefined) => {
+        console.log("Connected: " + frame);
+      },
+      (error: string | Frame) => {
+        console.error("Connection error:", error);
+      }
+    );
+
+    setStompClient(stompClient);
+
+    // Cleanup khi component unmount
+    return () => {
+      if (stompClient && stompClient.connected) {
+        stompClient.disconnect(() => {
+          console.log("Disconnected");
+        });
+      }
+    };
+  }, []);
   const getProgressColor = (percent: number, isFull: boolean) => {
     if (isFull) return "bg-neutral-400"; // Hết quà: Màu xám
     if (percent > 90) return "bg-red-500"; // Sắp hết: Màu đỏ
@@ -175,6 +204,12 @@ export default function ControlPage() {
       gift_code: selectedPrizeId,
       numb: +cage,
     });
+    const payload = {
+      campaign_code: program.code,
+      gift_code: selectedPrizeId,
+      numb: +cage,
+    };
+    stompClient?.send("/campaign/update-award", {}, JSON.stringify(payload));
     requestLucky(
       {
         campaign_code: program.code,
@@ -182,10 +217,12 @@ export default function ControlPage() {
         numb: +cage,
       },
       {
-        onSuccess: () => {
+        onSuccess: (res) => {
           showCage(normalized);
           showHistoryCage(normalized);
           setCage("");
+          //@ts-expect-error
+          alert(res.message);
         },
         onError: () => {
           alert("Nhập số thất bại");
@@ -212,7 +249,7 @@ export default function ControlPage() {
               <CardDescription>
                 {isCage
                   ? "Control nhập số, Audience hiển thị số lớn."
-                  : "Control quay số; Audience xem ticker và danh sách trúng."}
+                  : "Control chọn số; Audience xem ticker và danh sách trúng."}
               </CardDescription>
             </div>
           </CardHeader>
@@ -355,7 +392,7 @@ export default function ControlPage() {
                     <Gift className="h-4 w-4" />
                     Giải thưởng
                   </TabsTrigger>
-                  <TabsTrigger value="stage">Màn quay</TabsTrigger>
+                  <TabsTrigger value="stage">Màn chọn số</TabsTrigger>
                   <TabsTrigger value="winners">Danh sách trúng</TabsTrigger>
                 </TabsList>
 
@@ -608,7 +645,7 @@ export default function ControlPage() {
                     />
                   </div>
                   <div className="mt-6">
-                    <WinnersTicker items={winners} dot={THEMES[1].dot} />
+                    <WinnersTicker items={histories} dot={THEMES[1].dot} />
                   </div>
                 </TabsContent>
 

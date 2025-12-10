@@ -16,6 +16,10 @@ import { useDrawStore } from "@/lib/store";
 import { THEMES } from "@/lib/type";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import {
+  useGetListGiftCampaign,
+  useGetListLuckyHistory,
+} from "@/react-query/queries/campaign/campaign";
 
 function PrizeTicker({
   items,
@@ -77,15 +81,19 @@ export default function AudienceDeluxe() {
     [programId]
   );
   const themeKey = program?.status || (1 as keyof typeof THEMES);
-  const winners = useDrawStore((s) => s.winners);
   const prizes = useDrawStore((s) => s.prizes);
-
-  const prevCount = useRef(winners.length);
+  const { data: gifts } = useGetListGiftCampaign({
+    c: program?.code || "",
+  });
+  const { data: winners } = useGetListLuckyHistory({
+    c: program?.code || "",
+  });
+  const prevCount = useRef(winners?.length || 0);
   const [flash, setFlash] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tableWrapRef = useRef<HTMLDivElement | null>(null);
   const firstRowRef = useRef<HTMLTableRowElement | null>(null);
-  const last = winners[0];
+  const last = winners?.[0];
   const [isFull, setIsFull] = useState(false);
   const toggleFullScreen = async () => {
     const el = containerRef.current;
@@ -106,7 +114,7 @@ export default function AudienceDeluxe() {
   }, []);
 
   useEffect(() => {
-    if (winners.length > prevCount.current) {
+    if (winners && winners.length > prevCount.current) {
       confetti({ particleCount: 160, spread: 85, origin: { y: 0.28 } });
       setFlash(true);
       const t = setTimeout(() => setFlash(false), 2200);
@@ -118,8 +126,8 @@ export default function AudienceDeluxe() {
       prevCount.current = winners.length;
       return () => clearTimeout(t);
     }
-    prevCount.current = winners.length;
-  }, [winners.length]);
+    prevCount.current = winners?.length || 0;
+  }, [winners]);
 
   return (
     <div
@@ -213,19 +221,24 @@ export default function AudienceDeluxe() {
             {last ? (
               <div className="grid grid-cols-[200px_1fr] gap-4 items-center">
                 <div>
-                  {last.image ? (
-                    <img src={last.image} className="w-44 object-contain" />
+                  {last.gift_image ? (
+                    <img
+                      src={last.gift_image}
+                      className="w-44 object-contain"
+                    />
                   ) : (
                     <div className="h-44 w-44 rounded-xl bg-neutral-100" />
                   )}
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm md:text-base">
                   <div className="text-neutral-500">Giải</div>
-                  <div className="font-semibold">{last.prizeLabel}</div>
+                  <div className="font-semibold">{last.award_name}</div>
                   <div className="text-neutral-500">Tên</div>
-                  <div className="font-semibold">{last.name ?? "—"}</div>
+                  <div className="font-semibold">
+                    {last.consumer_name ?? "—"}
+                  </div>
                   <div className="text-neutral-500">SĐT</div>
-                  <div className="font-mono">{last.phone}</div>
+                  <div className="font-mono">{last.consumer_phone}</div>
                   <div className="text-neutral-500">Thời gian</div>
                   <div>{new Date(last.time).toLocaleString()}</div>
                 </div>
@@ -251,9 +264,9 @@ export default function AudienceDeluxe() {
                   </tr>
                 </thead>
                 <tbody className="text-lg">
-                  {winners.map((w, idx) => (
+                  {winners?.map((w, idx) => (
                     <tr
-                      key={w.id}
+                      key={idx}
                       ref={idx === 0 ? firstRowRef : undefined}
                       className="border-t"
                     >
@@ -261,13 +274,13 @@ export default function AudienceDeluxe() {
                       <td className="p-3">
                         {new Date(w.time).toLocaleString()}
                       </td>
-                      <td className="p-3 font-medium">{w.prizeLabel}</td>
-                      <td className="p-3">{w.name ?? "—"}</td>
-                      <td className="p-3 font-mono">{w.phone}</td>
+                      <td className="p-3 font-medium">{w.award_name}</td>
+                      <td className="p-3">{w.consumer_name ?? "—"}</td>
+                      <td className="p-3 font-mono">{w.consumer_phone}</td>
                       <td className="p-3">
-                        {w.image ? (
+                        {w.gift_image ? (
                           <img
-                            src={w.image}
+                            src={w.gift_image}
                             className="w-20 rounded object-contain"
                           />
                         ) : (
@@ -276,7 +289,7 @@ export default function AudienceDeluxe() {
                       </td>
                     </tr>
                   ))}
-                  {!winners.length && (
+                  {!winners?.length && (
                     <tr>
                       <td
                         colSpan={6}

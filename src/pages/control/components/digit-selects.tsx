@@ -46,12 +46,15 @@ export function DigitSelects({
 
   const handleChange = useCallback(
     (idx: number, v: string) => {
-      const nextArr = [...digits];
-      nextArr[idx] = v;
-      const next = nextArr.join("");
-      onChange(next);
+      if (digits.filter((item) => item === "").length > 0) {
+        const nextArr = [...digits];
+        nextArr[idx] = v;
+
+        const next = nextArr.join("");
+        onChange(next);
+      }
     },
-    [digits, onChange, confirmPerDigit]
+    [digits, digitCount, onChange, confirmPerDigit]
   );
 
   return (
@@ -113,7 +116,9 @@ export function DigitSelects({
 
             <Input
               value={d}
-              onChange={(e) => handleChange(i, e.target.value)}
+              onChange={(e) =>
+                i < digitCount && handleChange(i, e.target.value)
+              }
             />
           </div>
         ))}

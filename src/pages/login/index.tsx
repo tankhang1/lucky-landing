@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -82,7 +82,7 @@ export default function LoginPage() {
                 Chào mừng trở lại!
               </h1>
               <p className="text-sm text-muted-foreground">
-                Đăng nhập hệ thống điều khiển quay số
+                Đăng nhập hệ thống điều khiển chọn số
               </p>
             </div>
 

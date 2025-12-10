@@ -60,7 +60,7 @@ export function ParticipantsTable({
             <tbody>
               {filtered.map((p, idx) => {
                 return (
-                  <tr key={p.id} className="border-t">
+                  <tr key={idx} className="border-t">
                     <td className="p-3">{idx + 1}</td>
                     <td className="p-3">{p.name ?? "—"}</td>
                     <td className="p-3 font-mono">{p.phone}</td>
