@@ -28,7 +28,6 @@ export default function FiveDigitJackpot({
 
   const [active, setActive] = useState<boolean[]>(Array(5).fill(true));
   const [stopNumbers, setStopNumbers] = useState<number[]>([0, 0, 0, 0, 0]);
-  const [open, setOpen] = useState(false);
 
   // Sounds
   const [playSpin, { stop: stopSpin }] = useSound(
@@ -40,7 +39,6 @@ export default function FiveDigitJackpot({
 
   const allStopped = active.every((a) => !a);
   const numberStr = stopNumbers.join("");
-  const fsRef = useFullscreenContainer();
 
   // --- Logic: Start/Stop ---
   const startAll = () => {
@@ -84,9 +82,7 @@ export default function FiveDigitJackpot({
       const prizeIdx = prizes.length ? 0 : -1;
       if (prizeIdx >= 0) {
         addWinnerFromJackpot(prizeIdx);
-        // Delay opening slightly to let the "Ding" sink in
         setTimeout(() => {
-          setOpen(true);
           playWin();
           triggerConfetti();
         }, 500);
