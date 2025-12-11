@@ -166,7 +166,10 @@ export default function ControlPage() {
     return "bg-emerald-500"; // Còn nhiều: Màu xanh ngọc
   };
   const handleShowCage = useCallback(() => {
-    if (!cage || !program?.code) return;
+    if (!cage || !program?.code || !selectedPrizeId) {
+      alert("Vui lòng nhập đủ thông tin!");
+      return;
+    }
     const normalized = cage
       .replace(/\D/g, "")
       .padStart(digitCount, "0")
