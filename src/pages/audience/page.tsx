@@ -112,7 +112,7 @@ export default function AudienceDeluxe() {
         <img src={Logo} className="w-96 absolute top-0" />
 
         <div className="w-full lg:w-[55%] flex flex-col items-center justify-center gap-0 ">
-          <div className="flex items-center text-5xl font-bold text-[#0F392B] tracking-widest uppercase">
+          <div className="flex items-center text-5xl font-extrabold text-[#0F392B] tracking-widest uppercase">
             QUAY SỐ MAY MẮN
           </div>
           {receivedEvent?.award_name && (
@@ -245,9 +245,7 @@ export default function AudienceDeluxe() {
                       <td className="p-3 text-center">
                         {w.consumer_name ?? "—"}
                       </td>
-                      <td className="p-3 font-mono text-center">
-                        {w.consumer_phone}
-                      </td>
+                      <td className="p-3 text-center">{w.consumer_phone}</td>
                       <td className="p-3 text-center">
                         {w.gift_image ? (
                           <img
