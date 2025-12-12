@@ -98,6 +98,7 @@ export default function AudienceDeluxe() {
       }
     };
   }, []);
+
   console.log("receive", receivedEvent);
   return (
     <div
@@ -112,7 +113,7 @@ export default function AudienceDeluxe() {
         <img src={Logo} className="w-96 absolute top-0" />
 
         <div className="w-full lg:w-[60%] flex flex-col items-center justify-center gap-0 ">
-          <div className="flex items-center text-5xl font-extrabold text-[#0F392B] tracking-widest uppercase">
+          <div className="flex items-center text-3xl lg:text-5xl font-extrabold text-[#0F392B] tracking-widest uppercase">
             QUAY SỐ MAY MẮN
           </div>
           {receivedEvent?.award_name && (
@@ -131,7 +132,7 @@ export default function AudienceDeluxe() {
             </AnimatePresence>
           )}
 
-          <div className="relative p-6">
+          <div className="relative">
             <FiveDigitJackpot
               number={receivedEvent?.numb?.toString() || "00000"}
               type={receivedEvent?.type?.toString() || ""}

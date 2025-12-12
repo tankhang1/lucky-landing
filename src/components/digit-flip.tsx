@@ -91,7 +91,7 @@ export default function DigitReel({
     <div
       onClick={onClick}
       className="relative overflow-hidden rounded-sm cursor-pointer"
-      style={{ height: h, width: h * 0.8 }}
+      style={{ height: h, maxWidth: 140, minWidth: 130 }}
     >
       <motion.div style={{ y, willChange: "transform" }}>
         {list.map((d, i) => (

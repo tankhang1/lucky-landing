@@ -181,7 +181,7 @@ export default function FiveDigitJackpot({
       {/* --- REELS --- */}
       <div className="relative overflow-hidden p-6">
         <div className="relative flex flex-col items-center gap-6">
-          <div className="flex justify-center gap-2 sm:gap-4 flex-wrap">
+          <div className="flex justify-center gap-1 flex-nowrap">
             {active.map((isActive, i) => (
               <DigitReel
                 key={i}
