@@ -147,7 +147,7 @@ export default function FiveDigitJackpot({
         availableSpaceForReels / (numberOfReels * aspectRatio);
 
       // Optional: Cap the max height so it doesn't look huge on large screens
-      const MAX_HEIGHT = 200;
+      const MAX_HEIGHT = 160;
       const MIN_HEIGHT = 60; // Don't let it get too small
 
       calculatedHeight = Math.min(
