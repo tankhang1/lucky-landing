@@ -1,14 +1,11 @@
 // components/draw/FiveDigitJackpot.tsx
 "use client";
 import { useEffect, useRef, useState } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
 import useSound from "use-sound";
 import confetti from "canvas-confetti";
-import { motion, AnimatePresence } from "framer-motion"; // Make sure to install framer-motion
 import { useDrawStore } from "@/lib/store";
 import DigitReel from "./digit-flip";
 import { Button } from "./ui/button";
-import { Trophy, Gift, X } from "lucide-react";
 import LuckyNumberBg from "@/assets/lucky-number.png";
 export default function FiveDigitJackpot({
   isControl = false,

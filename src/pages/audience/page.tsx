@@ -111,7 +111,7 @@ export default function AudienceDeluxe() {
       <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
         <img src={Logo} className="w-96 absolute top-0" />
 
-        <div className="w-full lg:w-[55%] flex flex-col items-center justify-center gap-0 ">
+        <div className="w-full lg:w-[60%] flex flex-col items-center justify-center gap-0 ">
           <div className="flex items-center text-5xl font-extrabold text-[#0F392B] tracking-widest uppercase">
             QUAY SỐ MAY MẮN
           </div>
@@ -137,12 +137,12 @@ export default function AudienceDeluxe() {
               type={receivedEvent?.type?.toString() || ""}
             />
           </div>
-          <div className="text-center text-[#0F392B] text-xl mt-[-10px] font-medium">
+          {/* <div className="text-center text-[#0F392B] text-xl mt-[-10px] font-medium">
             Đang chờ khảo sát trên
-          </div>
+          </div> */}
         </div>
 
-        <div className="w-full lg:w-[45%] flex flex-col gap-6">
+        <div className="w-full lg:w-[40%] flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <div className="relative">
               <img src={CrownIcon} className="w-14" />

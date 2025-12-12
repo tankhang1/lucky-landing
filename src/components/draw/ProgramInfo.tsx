@@ -13,9 +13,9 @@ export default function ProgramInfo({
 }) {
   if (!program) return null;
   return (
-    <Card className="overflow-hidden border-0 shadow-lg ring-2 ring-primary/20">
+    <Card className="overflow-hidden border-0 shadow-lg ring-2 ring-primary/20 px-6">
       <div className="grid lg:grid-cols-[380px_1fr]">
-        <div className="relative">
+        <div className="relative rounded-2xl overflow-hidden">
           {program.image_banner ? (
             <img
               src={program.image_banner}
