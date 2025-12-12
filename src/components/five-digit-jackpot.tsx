@@ -219,7 +219,7 @@ export default function FiveDigitJackpot({
       </div>
 
       {/* --- DIALOG (RESULT) --- */}
-      <Dialog.Root
+      {/* <Dialog.Root
         open={allStopped}
         onOpenChange={() => setActive(Array(number.length).fill(true))}
       >
@@ -241,20 +241,17 @@ export default function FiveDigitJackpot({
                   exit={{ opacity: 0, scale: 0.8, y: 20 }}
                   className="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden border border-white/20"
                 >
-                  {/* Close Button */}
                   <Dialog.Close className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/5 transition-colors z-10">
                     <X className="w-6 h-6 text-slate-400" />
                   </Dialog.Close>
 
                   <div className="flex flex-col items-center p-8 pb-12">
-                    {/* Header */}
                     <div className="flex items-center gap-2 text-amber-500 font-bold uppercase tracking-widest text-sm mb-6">
                       <Trophy className="w-5 h-5" />
                       <div>Chúc mừng chiến thắng</div>
                       <Trophy className="w-5 h-5" />
                     </div>
 
-                    {/* BIG WINNING NUMBER */}
                     <motion.div
                       initial={{ scale: 0.5, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
@@ -266,11 +263,9 @@ export default function FiveDigitJackpot({
                       }}
                       className="relative z-10"
                     >
-                      {/* Glow Effect behind number */}
                       <div className="absolute inset-0 bg-amber-400/30 blur-[60px] rounded-full" />
 
                       <motion.h2
-                        // The Heartbeat / Zoom In-Out Effect
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{
                           repeat: Infinity,
@@ -285,7 +280,6 @@ export default function FiveDigitJackpot({
                       </motion.h2>
                     </motion.div>
 
-                    {/* WINNER DETAILS CARD */}
                     {winners[0] ? (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -331,7 +325,7 @@ export default function FiveDigitJackpot({
             </AnimatePresence>
           </Dialog.Content>
         </Dialog.Portal>
-      </Dialog.Root>
+      </Dialog.Root> */}
     </div>
   );
 }
