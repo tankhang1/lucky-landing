@@ -125,53 +125,34 @@ export default function FiveDigitJackpot({
       }
     }
   }, [allStopped]);
-  useEffect(() => {
-    const calculateSize = () => {
-      if (!containerRef.current) return;
+  // useEffect(() => {
+  //   const calculateSize = () => {
+  //     if (!containerRef.current) return;
 
-      const width = containerRef.current.offsetWidth;
-      const gap = 16; // The gap you want between reels (in px)
-      const numberOfReels = 5;
-      const aspectRatio = 0.8; // From DigitReel: width = h * 0.65
+  //     // Optional: Cap the max height so it doesn't look huge on large screens
+  //     const MAX_HEIGHT = 170;
+  //     const MIN_HEIGHT = 100; // Don't let it get too small
 
-      // Formula: TotalWidth = (ReelWidth * 5) + (Gap * 4)
-      // ReelWidth = Height * 0.65
-      // Width = (Height * 0.65 * 5) + (Gap * 4)
-      // Height = (Width - (Gap * 4)) / (0.65 * 5)
+  //     calculatedHeight =
+  //       Math.min(Math.max(calculatedHeight, MIN_HEIGHT), MAX_HEIGHT) - 10;
 
-      const totalGapSpace = gap * (numberOfReels - 1);
-      const availableSpaceForReels = width - totalGapSpace;
+  //     setDynamicSize(Math.floor(calculatedHeight));
+  //   };
 
-      // Calculate max height that fits width
-      let calculatedHeight =
-        availableSpaceForReels / (numberOfReels * aspectRatio);
+  //   // Initial calculation
+  //   calculateSize();
 
-      // Optional: Cap the max height so it doesn't look huge on large screens
-      const MAX_HEIGHT = 160;
-      const MIN_HEIGHT = 60; // Don't let it get too small
+  //   // Observe resizing
+  //   const observer = new ResizeObserver(() => {
+  //     calculateSize();
+  //   });
 
-      calculatedHeight = Math.min(
-        Math.max(calculatedHeight, MIN_HEIGHT),
-        MAX_HEIGHT
-      );
+  //   if (containerRef.current) {
+  //     observer.observe(containerRef.current);
+  //   }
 
-      setDynamicSize(Math.floor(calculatedHeight));
-    };
-
-    // Initial calculation
-    calculateSize();
-
-    // Observe resizing
-    const observer = new ResizeObserver(() => {
-      calculateSize();
-    });
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
+  //   return () => observer.disconnect();
+  // }, []);
   return (
     <div className="w-full" ref={containerRef}>
       <div
@@ -181,7 +162,7 @@ export default function FiveDigitJackpot({
       {/* --- REELS --- */}
       <div className="relative overflow-hidden p-6">
         <div className="relative flex flex-col items-center gap-6">
-          <div className="flex justify-center gap-1 flex-nowrap">
+          <div className="flex justify-center gap-1 pt-2 pb-3 flex-nowrap">
             {active.map((isActive, i) => (
               <DigitReel
                 key={i}
