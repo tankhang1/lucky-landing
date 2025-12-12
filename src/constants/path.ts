@@ -9,6 +9,7 @@ const PATH = {
     GET_DETAIL_NUMBER: "/zalo/campaign/detail/number",
     GET_LUCKY_HISTORY: "/zalo/campaign/lucky/history",
     REQUEST_LUCKY_MANUAL: "/program/congrat-manual",
+    REQUEST_LUCKY_RANDOM: "/program/congrat-random",
     PUBLISH_EVENT: "/collect/data-socket",
   },
 };

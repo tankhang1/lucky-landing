@@ -27,6 +27,7 @@ import {
   useGetListGiftCampaign,
   useGetListLuckyHistory,
   useRequestLuckyManual,
+  useRequestLuckyRandom,
   useRequestPublishEvent,
 } from "@/react-query/queries/campaign/campaign";
 import { Badge } from "@/components/ui/badge";
@@ -114,7 +115,7 @@ function SummaryCard({
 }
 
 export default function ControlPage() {
-  const [digitCount, setDigitCount] = useState(3);
+  const [digitCount, setDigitCount] = useState(5);
   const [selectedPrizeId, setSelectedPrizeId] = useState("");
   const programs = useDrawStore((s) => s.programs);
   const programId = useDrawStore((s) => s.programId);
@@ -132,6 +133,8 @@ export default function ControlPage() {
   });
   const { mutate: requestLucky, isPending: isLoadingRequest } =
     useRequestLuckyManual();
+  const { mutate: requestLuckyRandom, isPending: isLoadingRequestRandom } =
+    useRequestLuckyRandom();
   const { mutate: requestPublishEvent } = useRequestPublishEvent();
   const prizes = useDrawStore((s) => s.prizes);
   const setPrize = useDrawStore((s) => s.setPrize);
@@ -170,6 +173,10 @@ export default function ControlPage() {
       alert("Vui lòng nhập đủ thông tin!");
       return;
     }
+    if (cage.length !== digitCount) {
+      alert(`Vui lòng nhập đủ ${digitCount} số`);
+      return;
+    }
     const normalized = cage
       .replace(/\D/g, "")
       .padStart(digitCount, "0")
@@ -180,36 +187,67 @@ export default function ControlPage() {
       numb: +cage,
     });
     const [gift_code, award_name] = selectedPrizeId.split("_");
-    requestLucky(
-      {
-        campaign_code: program.code,
-        gift_code: gift_code,
-        numb: +cage,
-      },
-      {
-        onSuccess: (res) => {
-          showCage(normalized);
-          showHistoryCage(normalized);
-          setCage("");
-          requestPublishEvent({
-            type: program.type,
-            data: JSON.stringify({
-              campaign_code: program.code,
-              gift_code: gift_code,
-              numb: +cage,
-              award_name: award_name,
+    if (program.type === 0) {
+      requestLucky(
+        {
+          campaign_code: program.code,
+          gift_code: gift_code,
+          numb: +cage,
+        },
+        {
+          onSuccess: (res) => {
+            showCage(normalized);
+            showHistoryCage(normalized);
+            setCage("");
+            requestPublishEvent({
               type: program.type,
-            }),
-          });
+              data: JSON.stringify({
+                campaign_code: program.code,
+                gift_code: gift_code,
+                numb: +cage,
+                award_name: award_name,
+                type: program.type,
+              }),
+            });
 
-          //@ts-expect-error no check
-          alert(res?.message);
+            //@ts-expect-error no check
+            alert(res?.message);
+          },
+          onError: () => {
+            alert("Nhập số thất bại");
+          },
+        }
+      );
+    } else {
+      requestLuckyRandom(
+        {
+          campaign_code: program.code,
         },
-        onError: () => {
-          alert("Nhập số thất bại");
-        },
-      }
-    );
+        {
+          onSuccess: (res) => {
+            showCage(normalized);
+            showHistoryCage(normalized);
+            setCage("");
+            requestPublishEvent({
+              type: program.type,
+              data: JSON.stringify({
+                campaign_code: program.code,
+                gift_code: gift_code,
+                numb: +cage,
+                award_name: award_name,
+                type: program.type,
+              }),
+            });
+
+            //@ts-expect-error no check
+            alert(res?.message);
+          },
+          onError: () => {
+            alert("Nhập số thất bại");
+          },
+        }
+      );
+    }
   }, [cage, showCage]);
   useEffect(() => {
     if (prizes && prizes.length > 0) {
@@ -564,71 +602,125 @@ export default function ControlPage() {
                     )}
                   </div>
                 </TabsContent>
-                <TabsContent value="stage" className="mt-4">
-                  <div className="grid xl:grid-cols-3 gap-5">
-                    <Card className="xl:col-span-2">
-                      <CardHeader className="pb-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <CardTitle className="text-base">
-                              Nhập số online
-                            </CardTitle>
-                            <CardDescription className="text-sm">
-                              Chọn số rồi bấm “Hiển thị”.
-                            </CardDescription>
+                {program?.type === 0 ? (
+                  <TabsContent value="stage" className="mt-4">
+                    <div className="grid xl:grid-cols-3 gap-5">
+                      <Card className="xl:col-span-2">
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle className="text-base">
+                                Nhập số online
+                              </CardTitle>
+                              <CardDescription className="text-sm">
+                                Chọn số rồi bấm “Hiển thị”.
+                              </CardDescription>
+                            </div>
+                            <Button
+                              size="sm"
+                              className="h-9 rounded-lg px-4"
+                              onClick={handleShowCage}
+                              disabled={isLoadingRequest}
+                            >
+                              {isLoadingRequest ? "Đang xử lí..." : "Hiển thị"}
+                            </Button>
                           </div>
-                          <Button
-                            size="sm"
-                            className="h-9 rounded-lg px-4"
-                            onClick={handleShowCage}
-                            disabled={isLoadingRequest}
-                          >
-                            {isLoadingRequest ? "Đang xử lí..." : "Hiển thị"}
-                          </Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <DigitSelects
-                          value={cage}
-                          onChange={setCage}
-                          digitCount={digitCount}
-                          onChangeDigitCount={setDigitCount}
-                          selectedPrizeId={selectedPrizeId}
-                          onPrizeChange={setSelectedPrizeId}
-                          prizes={gifts || []}
-                        />
-                        <CagePreview value={cage} count={digitCount} />
-                        <div className="flex gap-2">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="h-9 rounded-lg"
-                            onClick={() => setCage("")}
-                          >
-                            Xóa nhập
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-9 rounded-lg"
-                            onClick={resetCage}
-                          >
-                            Làm mới lịch sử
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <DigitSelects
+                            value={cage}
+                            onChange={setCage}
+                            digitCount={digitCount}
+                            onChangeDigitCount={setDigitCount}
+                            selectedPrizeId={selectedPrizeId}
+                            onPrizeChange={setSelectedPrizeId}
+                            prizes={gifts || []}
+                          />
+                          <CagePreview value={cage} count={digitCount} />
+                          <div className="flex gap-2">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-9 rounded-lg"
+                              onClick={() => setCage("")}
+                            >
+                              Xóa nhập
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-9 rounded-lg"
+                              onClick={resetCage}
+                            >
+                              Làm mới lịch sử
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
 
-                    <SummaryCard
-                      title={program?.name}
-                      display={cageDisplay}
-                      history={cageHistory}
-                    />
-                  </div>
-                  <div className="mt-6">
-                    <WinnersTicker items={histories} dot={THEMES[1].dot} />
-                  </div>
-                </TabsContent>
+                      <SummaryCard
+                        title={program?.name}
+                        display={cageDisplay}
+                        history={cageHistory}
+                      />
+                    </div>
+                    <div className="mt-6">
+                      <WinnersTicker items={histories} dot={THEMES[1].dot} />
+                    </div>
+                  </TabsContent>
+                ) : (
+                  <TabsContent value="stage" className="mt-4">
+                    <div className="grid xl:grid-cols-3 gap-5">
+                      <Card className="xl:col-span-2">
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle className="text-base">
+                                Chọn số ngẫu nhiên
+                              </CardTitle>
+                              <CardDescription className="text-sm">
+                                Chọn số rồi bấm “Hiển thị”.
+                              </CardDescription>
+                            </div>
+                            <div className="space-x-2">
+                              <Button
+                                size="sm"
+                                className="h-9 rounded-lg px-4"
+                                onClick={handleShowCage}
+                                disabled={isLoadingRequest}
+                              >
+                                {isLoadingRequest ? "Đang xử lí..." : "Chọn số"}
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="text-8xl font-medium">{cage}</div>
+
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-9 rounded-lg"
+                              onClick={resetCage}
+                            >
+                              Làm mới lịch sử
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <SummaryCard
+                        title={program?.name}
+                        display={cageDisplay}
+                        history={cageHistory}
+                      />
+                    </div>
+                    <div className="mt-6">
+                      <WinnersTicker items={histories} dot={THEMES[1].dot} />
+                    </div>
+                  </TabsContent>
+                )}
 
                 <TabsContent value="winners" className="mt-4">
                   <div className="border rounded-xl overflow-hidden bg-card/50">

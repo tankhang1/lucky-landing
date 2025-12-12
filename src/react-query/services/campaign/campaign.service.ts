@@ -126,6 +126,17 @@ export const requestLuckyManual = async (
   return data;
 };
 
+export type TRequestLuckyRandomReq = {
+  campaign_code: string;
+};
+
+export type TRequestLuckyRandomRes = {};
+export const requestLuckyRandom = async (
+  body: TRequestLuckyRandomReq
+): Promise<TRequestLuckyRandomRes> => {
+  const { data } = await api.post(PATH.CAMPAIGN.REQUEST_LUCKY_RANDOM, body);
+  return data;
+};
 export type TCampaignLuckyHistory = {
   number: number;
   consumer_name: string;

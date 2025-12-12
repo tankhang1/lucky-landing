@@ -81,7 +81,7 @@ export function DigitSelects({
           </Select>
         </div>
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label className="text-slate-600 font-semibold text-xs uppercase tracking-wider">
             Số ô hiển thị
           </Label>
@@ -104,7 +104,7 @@ export function DigitSelects({
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
       <Separator />
       <div

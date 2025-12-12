@@ -6,6 +6,7 @@ import {
   getListCustomerCampaign,
   getListGiftCampaign,
   requestLuckyManual,
+  requestLuckyRandom,
   requestPublishEvent,
   type TGetCampaignDetailNumberReq,
   type TGetCampaignDetailNumberRes,
@@ -19,6 +20,8 @@ import {
   type TPublishEventReq,
   type TRequestLuckyManualReq,
   type TRequestLuckyManualRes,
+  type TRequestLuckyRandomReq,
+  type TRequestLuckyRandomRes,
 } from "@/react-query/services/campaign/campaign.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
@@ -77,6 +80,15 @@ export const useRequestLuckyManual = () => {
     TRequestLuckyManualReq
   >({
     mutationFn: requestLuckyManual,
+  });
+};
+export const useRequestLuckyRandom = () => {
+  return useMutation<
+    TRequestLuckyRandomRes,
+    AxiosError<null>,
+    TRequestLuckyRandomReq
+  >({
+    mutationFn: requestLuckyRandom,
   });
 };
 
