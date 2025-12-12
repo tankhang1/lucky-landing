@@ -15,8 +15,9 @@ import {
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
 import type { TReceiveEvent } from "@/react-query/services/campaign/campaign.service";
-import PrizeTicker from "./components/PrizeTicker";
-
+import AudienceBg from "@/assets/audience-theme.png";
+import CrownIcon from "@/assets/crown.png";
+import Logo from "@/assets/audience-logo.png";
 export default function AudienceDeluxe() {
   const navigate = useNavigate();
   const [receivedEvent, setReceivedEvent] = useState<TReceiveEvent | null>(
@@ -104,58 +105,50 @@ export default function AudienceDeluxe() {
       className="relative h-screen w-screen overflow-hidden"
     >
       <div
-        className={cn(
-          "absolute inset-0",
-          "bg-[radial-gradient(900px_600px_at_10%_-10%,#fff7e6_0%,transparent_60%),radial-gradient(800px_520px_at_110%_120%,#ffe4e6_0%,transparent_60%),linear-gradient(180deg,#fff_0%,#f8fafc_100%)]"
-        )}
+        className="absolute inset-0 bg-no-repeat bg-[length:100%_100%]"
+        style={{ backgroundImage: `url(${AudienceBg})` }}
       />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-multiply [background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%224%22 height=%224%22 viewBox=%220 0 4 4%22><path fill=%22%23000%22 fill-opacity=%220.6%22 d=%22M0 0h1v1H0zM2 0h1v1H2zM1 1h1v1H1zM3 1h1v1H3zM0 2h1v1H0zM2 2h1v1H2zM1 3h1v1H1zM3 3h1v1H3z%22/></svg>')]" />
-      <div className="absolute inset-0">
-        <div className="absolute -top-24 -left-24 h-[36rem] w-[36rem] bg-amber-300/30 blur-3xl rounded-full" />
-        <div className="absolute -bottom-24 -right-24 h-[36rem] w-[36rem] bg-rose-300/30 blur-3xl rounded-full" />
-      </div>
-
       <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
-        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center gap-8">
-          <div className="flex items-center gap-2 text-xl font-bold text-amber-600/80 tracking-widest uppercase">
-            <Trophy className="w-5 h-5 mb-1" />
-            <span>GIẢI ĐANG QUAY</span>
-            <Trophy className="w-5 h-5 mb-1" />
+        <img src={Logo} className="w-96 absolute top-0" />
+
+        <div className="w-full lg:w-[55%] flex flex-col items-center justify-center gap-0 ">
+          <div className="flex items-center text-5xl font-bold text-[#0F392B] tracking-widest uppercase">
+            QUAY SỐ MAY MẮN
           </div>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key="DB"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="text-center"
-            >
-              <div className="text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-neutral-800 to-neutral-600 drop-shadow-sm leading-tight p-2 uppercase">
-                {receivedEvent?.award_name}
-              </div>
-            </motion.div>
-          </AnimatePresence>
-          <div className="rounded-3xl border bg-white/60 backdrop-blur p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]">
+          {receivedEvent?.award_name && (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key="DB"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="text-center"
+              >
+                <div className="text-5xl md:text-6xl lg:text-7xl font-black text-[#0F392B] drop-shadow-sm leading-tight p-2 uppercase">
+                  {receivedEvent?.award_name}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          )}
+
+          <div className="relative p-6">
             <FiveDigitJackpot
               number={receivedEvent?.numb?.toString() || "00000"}
               type={receivedEvent?.type?.toString() || ""}
             />
           </div>
-          <div className="text-center text-neutral-700 font-medium">
-            Đang chờ thao tác từ màn Control…
+          <div className="text-center text-[#0F392B] text-xl mt-[-10px] font-medium">
+            Đang chờ khảo sát trên
           </div>
         </div>
 
-        <div className="hidden lg:flex w-px bg-neutral-200/60 rounded-full" />
-
-        <div className="w-full lg:w-1/2 flex flex-col gap-6">
+        <div className="w-full lg:w-[45%] flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="absolute inset-0 blur-md rounded-full bg-amber-400/60" />
-              <Crown className="relative w-8 h-8 text-amber-600 drop-shadow" />
+              <img src={CrownIcon} className="w-14" />
             </div>
-            <div className="text-2xl md:text-3xl font-bold text-neutral-900">
-              SỐ TRÚNG THƯỞNG GẦN NHẤT
+            <div className="text-2xl md:text-3xl font-bold text-[#0F392B]">
+              Người trúng giải gần nhất
             </div>
             <button
               onClick={toggleFullScreen}
@@ -168,13 +161,13 @@ export default function AudienceDeluxe() {
                 <Maximize2 className="h-5 w-5 text-neutral-700" />
               )}
             </button>
-            <button
+            {/* <button
               onClick={() => navigate("/control")}
               className="absolute top-4 left-4 z-50 p-2"
               title={isFull ? "Exit Full Screen" : "Full Screen"}
             >
               <ArrowLeft />
-            </button>
+            </button> */}
           </div>
 
           <motion.div
@@ -222,17 +215,17 @@ export default function AudienceDeluxe() {
 
           <WinnersTicker items={winners} dot={THEMES[1].dot} />
 
-          <div className="rounded-2xl border overflow-hidden bg-white/70 backdrop-blur">
-            <div ref={tableWrapRef} className="max-h-[55vh] overflow-auto">
+          <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
+            <div ref={tableWrapRef} className="max-h-[50vh] overflow-auto">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-neutral-50/90 backdrop-blur">
-                  <tr className="text-lg">
-                    <th className="text-left p-3 w-12">#</th>
-                    <th className="text-left p-3">Thời gian</th>
-                    <th className="text-left p-3">Giải</th>
-                    <th className="text-left p-3">Tên</th>
-                    <th className="text-left p-3">SĐT</th>
-                    <th className="text-left p-3">Ảnh</th>
+                <thead className="sticky top-0 bg-[#428C57]">
+                  <tr className="text-lg text-white">
+                    <th className="text-center p-3 w-12">STT</th>
+                    <th className="text-center p-3">Thời gian</th>
+                    <th className="text-center p-3">Giải</th>
+                    <th className="text-center p-3">Tên</th>
+                    <th className="text-center p-3">SĐT</th>
+                    <th className="text-center p-3">Ảnh</th>
                   </tr>
                 </thead>
                 <tbody className="text-lg">
@@ -242,14 +235,20 @@ export default function AudienceDeluxe() {
                       ref={idx === 0 ? firstRowRef : undefined}
                       className="border-t"
                     >
-                      <td className="p-3">{idx + 1}</td>
-                      <td className="p-3">
+                      <td className="p-3 text-center">{idx + 1}</td>
+                      <td className="p-3 text-center">
                         {new Date(w.time).toLocaleString()}
                       </td>
-                      <td className="p-3 font-medium">{w.award_name}</td>
-                      <td className="p-3">{w.consumer_name ?? "—"}</td>
-                      <td className="p-3 font-mono">{w.consumer_phone}</td>
-                      <td className="p-3">
+                      <td className="p-3 font-medium text-center">
+                        {w.award_name}
+                      </td>
+                      <td className="p-3 text-center">
+                        {w.consumer_name ?? "—"}
+                      </td>
+                      <td className="p-3 font-mono text-center">
+                        {w.consumer_phone}
+                      </td>
+                      <td className="p-3 text-center">
                         {w.gift_image ? (
                           <img
                             src={w.gift_image}
@@ -276,16 +275,6 @@ export default function AudienceDeluxe() {
             </div>
           </div>
         </div>
-
-        <PrizeTicker
-          items={
-            gifts?.map((p) => ({
-              label: p.gift_name,
-              count: p.counter,
-              image: p.gift_image,
-            })) || []
-          }
-        />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 // components/draw/FiveDigitJackpot.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import useSound from "use-sound";
 import confetti from "canvas-confetti";
@@ -9,18 +9,18 @@ import { useDrawStore } from "@/lib/store";
 import DigitReel from "./digit-flip";
 import { Button } from "./ui/button";
 import { Trophy, Gift, X } from "lucide-react";
-
+import LuckyNumberBg from "@/assets/lucky-number.png";
 export default function FiveDigitJackpot({
-  size = 160,
   isControl = false,
   number,
   type,
 }: {
-  size?: number;
   isControl?: boolean;
   number: string;
   type: string;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dynamicSize, setDynamicSize] = useState(160);
   const prizes = useDrawStore((s) => s.prizes);
   const winners = useDrawStore((s) => s.winners);
   const addWinnerFromJackpot = useDrawStore((s) => s.wheelStopAt);
@@ -128,8 +128,59 @@ export default function FiveDigitJackpot({
       }
     }
   }, [allStopped]);
+  useEffect(() => {
+    const calculateSize = () => {
+      if (!containerRef.current) return;
+
+      const width = containerRef.current.offsetWidth;
+      const gap = 16; // The gap you want between reels (in px)
+      const numberOfReels = 5;
+      const aspectRatio = 0.8; // From DigitReel: width = h * 0.65
+
+      // Formula: TotalWidth = (ReelWidth * 5) + (Gap * 4)
+      // ReelWidth = Height * 0.65
+      // Width = (Height * 0.65 * 5) + (Gap * 4)
+      // Height = (Width - (Gap * 4)) / (0.65 * 5)
+
+      const totalGapSpace = gap * (numberOfReels - 1);
+      const availableSpaceForReels = width - totalGapSpace;
+
+      // Calculate max height that fits width
+      let calculatedHeight =
+        availableSpaceForReels / (numberOfReels * aspectRatio);
+
+      // Optional: Cap the max height so it doesn't look huge on large screens
+      const MAX_HEIGHT = 200;
+      const MIN_HEIGHT = 60; // Don't let it get too small
+
+      calculatedHeight = Math.min(
+        Math.max(calculatedHeight, MIN_HEIGHT),
+        MAX_HEIGHT
+      );
+
+      setDynamicSize(Math.floor(calculatedHeight));
+    };
+
+    // Initial calculation
+    calculateSize();
+
+    // Observe resizing
+    const observer = new ResizeObserver(() => {
+      calculateSize();
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
   return (
-    <div className="w-full">
+    <div className="w-full" ref={containerRef}>
+      <div
+        className="absolute inset-0 bg-no-repeat bg-[length:100%_100%]"
+        style={{ backgroundImage: `url(${LuckyNumberBg})` }}
+      />
       {/* --- REELS --- */}
       <div className="relative overflow-hidden p-6">
         <div className="relative flex flex-col items-center gap-6">
@@ -139,7 +190,7 @@ export default function FiveDigitJackpot({
                 key={i}
                 active={isActive}
                 stopNumber={stopNumbers[i]}
-                size={size}
+                size={dynamicSize}
                 speed={700 + i * 60}
                 extraTurns={2}
                 onClick={() =>

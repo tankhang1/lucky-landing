@@ -96,7 +96,7 @@ export default function CageControlPage() {
           <Card>
             <CardHeader>
               <CardTitle>Tóm tắt</CardTitle>
-              <CardDescription>{program?.title}</CardDescription>
+              <CardDescription>{program?.name}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex justify-between">
