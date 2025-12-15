@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
@@ -39,6 +39,7 @@ export function DigitSelects({
   selectedPrizeId,
   onPrizeChange,
 }: DigitSelectsProps) {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const digits = useMemo(
     () => Array.from({ length: digitCount }, (_, i) => value[i] ?? ""),
     [value, digitCount]
@@ -46,16 +47,25 @@ export function DigitSelects({
 
   const handleChange = useCallback(
     (idx: number, v: string) => {
-      if (digits.filter((item) => item === "").length > 0) {
-        const nextArr = [...digits];
-        nextArr[idx] = v;
+      if (!/^\d?$/.test(v)) return; // only 0–9 or empty
 
-        const next = nextArr.join("");
-        onChange(next);
+      const nextArr = [...digits];
+      nextArr[idx] = v;
+      onChange(nextArr.join(""));
+      if (v && idx < digitCount - 1) {
+        inputRefs.current[idx + 1]?.focus();
       }
     },
     [digits, digitCount, onChange, confirmPerDigit]
   );
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    idx: number
+  ) => {
+    if (e.key === "Backspace" && !digits[idx] && idx > 0) {
+      inputRefs.current[idx - 1]?.focus();
+    }
+  };
 
   return (
     <>
@@ -118,10 +128,13 @@ export function DigitSelects({
             <Label className={labelClass}>Số {i + 1}</Label>
 
             <Input
+              //@ts-expect-error no check
+              ref={(el) => (inputRefs.current[i] = el)}
+              maxLength={1}
+              inputMode="numeric"
               value={d}
-              onChange={(e) =>
-                i < digitCount && handleChange(i, e.target.value)
-              }
+              onChange={(e) => handleChange(i, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, i)}
             />
           </div>
         ))}
