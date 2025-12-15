@@ -130,7 +130,10 @@ export type TRequestLuckyRandomReq = {
   campaign_code: string;
 };
 
-export type TRequestLuckyRandomRes = {};
+export type TRequestLuckyRandomRes = {
+  data: any;
+  message: string;
+};
 export const requestLuckyRandom = async (
   body: TRequestLuckyRandomReq
 ): Promise<TRequestLuckyRandomRes> => {

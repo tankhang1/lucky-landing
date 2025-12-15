@@ -122,6 +122,7 @@ export default function ControlPage() {
   const program = programs?.find((p) => p.id === programId);
   const themeKey = program?.status as keyof typeof THEMES;
   const isCage = false;
+  const [randomMessage, setRandomMessage] = useState("");
   const { data: customers } = useGetListCustomerCampaign({
     campaignCode: program?.code || "",
   });
@@ -169,25 +170,26 @@ export default function ControlPage() {
     return "bg-emerald-500"; // Còn nhiều: Màu xanh ngọc
   };
   const handleShowCage = useCallback(() => {
-    if (!cage || !program?.code || !selectedPrizeId) {
-      alert("Vui lòng nhập đủ thông tin!");
-      return;
-    }
-    if (cage.length !== digitCount) {
-      alert(`Vui lòng nhập đủ ${digitCount} số`);
-      return;
-    }
-    const normalized = cage
-      .replace(/\D/g, "")
-      .padStart(digitCount, "0")
-      .slice(-digitCount);
-    console.log({
-      campaign_code: program.code,
-      gift_code: selectedPrizeId,
-      numb: +cage,
-    });
-    const [gift_code, award_name] = selectedPrizeId.split("_");
-    if (program.type === 0) {
+    if (program?.type === 0) {
+      if (!cage || !program?.code || !selectedPrizeId) {
+        alert("Vui lòng nhập đủ thông tin!");
+        return;
+      }
+      if (cage.length !== digitCount) {
+        alert(`Vui lòng nhập đủ ${digitCount} số`);
+        return;
+      }
+      const normalized = cage
+        .replace(/\D/g, "")
+        .padStart(digitCount, "0")
+        .slice(-digitCount);
+      console.log({
+        campaign_code: program.code,
+        gift_code: selectedPrizeId,
+        numb: +cage,
+      });
+
+      const [gift_code, award_name] = selectedPrizeId.split("_");
       requestLucky(
         {
           campaign_code: program.code,
@@ -219,28 +221,19 @@ export default function ControlPage() {
         }
       );
     } else {
+      if (!program?.code) {
+        alert("Vui lòng chọn chương trình");
+        return;
+      }
+      setRandomMessage("");
       requestLuckyRandom(
         {
           campaign_code: program.code,
         },
         {
           onSuccess: (res) => {
-            showCage(normalized);
-            showHistoryCage(normalized);
-            setCage("");
-            requestPublishEvent({
-              type: program.type,
-              data: JSON.stringify({
-                campaign_code: program.code,
-                gift_code: gift_code,
-                numb: +cage,
-                award_name: award_name,
-                type: program.type,
-              }),
-            });
-
-            //@ts-expect-error no check
-            alert(res?.message);
+            console.log(res);
+            setRandomMessage(res.message);
           },
           onError: () => {
             alert("Nhập số thất bại");
@@ -248,7 +241,7 @@ export default function ControlPage() {
         }
       );
     }
-  }, [cage, showCage]);
+  }, [program, selectedPrizeId, digitCount, cage, showCage]);
   useEffect(() => {
     if (prizes && prizes.length > 0) {
       setPrize(prizes);
@@ -687,34 +680,29 @@ export default function ControlPage() {
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
                                 onClick={handleShowCage}
-                                disabled={isLoadingRequest}
+                                disabled={isLoadingRequestRandom}
                               >
-                                {isLoadingRequest ? "Đang xử lí..." : "Chọn số"}
+                                {isLoadingRequestRandom
+                                  ? "Đang xử lí..."
+                                  : "Chọn số"}
                               </Button>
                             </div>
                           </div>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="text-8xl font-medium">{cage}</div>
-
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-9 rounded-lg"
-                              onClick={resetCage}
-                            >
-                              Làm mới lịch sử
-                            </Button>
+                          <div className="text-2xl font-medium">
+                            {randomMessage}
                           </div>
                         </CardContent>
                       </Card>
 
-                      <SummaryCard
-                        title={program?.name}
-                        display={cageDisplay}
-                        history={cageHistory}
-                      />
+                      {program?.type === 0 && (
+                        <SummaryCard
+                          title={program?.name}
+                          display={cageDisplay}
+                          history={cageHistory}
+                        />
+                      )}
                     </div>
                     <div className="mt-6">
                       <WinnersTicker items={histories} dot={THEMES[1].dot} />
@@ -786,21 +774,6 @@ export default function ControlPage() {
               </Tabs>
             )}
           </CardContent>
-
-          {!isCage && (
-            <>
-              <Separator />
-              <CardFooter className="justify-between">
-                <div className="text-sm text-muted-foreground">
-                  {/* Dot màu: {THEMES[themeKey].dot} */}
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline">Xuất CSV</Button>
-                  {/* <Button>Phát trực tiếp</Button> */}
-                </div>
-              </CardFooter>
-            </>
-          )}
         </Card>
       </main>
     </Shell>
