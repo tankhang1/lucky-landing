@@ -102,6 +102,7 @@ export const useGetListLuckyHistory = (
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
+    refetchInterval: 10000,
   });
 };
 
