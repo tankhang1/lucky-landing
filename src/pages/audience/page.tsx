@@ -221,12 +221,12 @@ export default function AudienceDeluxe() {
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-[#428C57]">
                   <tr className="text-lg text-white">
-                    <th className="text-center p-3 w-12">STT</th>
-                    <th className="text-center p-3">Thời gian</th>
+                    {/* <th className="text-center p-3 w-12">STT</th> */}
+                    <th className="text-center p-3">Số may mắn</th>
                     <th className="text-center p-3">Giải</th>
+                    <th className="text-center p-3">Giá trị</th>
                     <th className="text-center p-3">Tên</th>
                     <th className="text-center p-3">SĐT</th>
-                    <th className="text-center p-3">Ảnh</th>
                   </tr>
                 </thead>
                 <tbody className="text-lg">
@@ -236,27 +236,16 @@ export default function AudienceDeluxe() {
                       ref={idx === 0 ? firstRowRef : undefined}
                       className="border-t"
                     >
-                      <td className="p-3 text-center">{idx + 1}</td>
-                      <td className="p-3 text-center">
-                        {new Date(w.time).toLocaleString()}
-                      </td>
+                      {/* <td className="p-3 text-center">{idx + 1}</td>*/}
+                      <td className="p-3 text-center">{w.number}</td>
                       <td className="p-3 font-medium text-center">
                         {w.award_name}
                       </td>
+                      <td className="p-3 text-center">-</td>
                       <td className="p-3 text-center">
                         {w.consumer_name ?? "—"}
                       </td>
                       <td className="p-3 text-center">{w.consumer_phone}</td>
-                      <td className="p-3 text-center">
-                        {w.gift_image ? (
-                          <img
-                            src={w.gift_image}
-                            className="w-20 rounded object-contain"
-                          />
-                        ) : (
-                          "—"
-                        )}
-                      </td>
                     </tr>
                   ))}
                   {!winners?.length && (

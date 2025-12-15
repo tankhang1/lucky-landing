@@ -42,11 +42,11 @@ export default function FiveDigitJackpot({
 
   // --- Logic: Start/Stop ---
   const startAll = () => {
-    playSpin();
-    setTimeout(() => {
-      stopSpin();
-      playDing();
-    }, 1500);
+    // playSpin();
+    // setTimeout(() => {
+    //   stopSpin();
+    //   playDing();
+    // }, 1500);
     setActive(Array(number.length).fill(true));
     setStopNumbers(number?.split("")?.map((item) => +item));
     if (type === "0") {
@@ -57,8 +57,8 @@ export default function FiveDigitJackpot({
   };
 
   const stopAll = () => {
-    stopSpin();
-    stopDing();
+    // stopSpin();
+    // stopDing();
     Array.from({ length: number.length }).forEach((_, i) => {
       setTimeout(() => {
         setActive((prev) => prev.map((v, idx) => (idx === i ? false : v)));
@@ -67,14 +67,14 @@ export default function FiveDigitJackpot({
         );
       }, i * 450);
     });
-    const prizeIdx = prizes.length ? 0 : -1;
-    if (prizeIdx >= 0) {
-      addWinnerFromJackpot(prizeIdx);
-      setTimeout(() => {
-        playWin();
-        triggerConfetti();
-      }, 500);
-    }
+    // const prizeIdx = prizes.length ? 0 : -1;
+    // if (prizeIdx >= 0) {
+    //   addWinnerFromJackpot(prizeIdx);
+    //   setTimeout(() => {
+    //     playWin();
+    //     triggerConfetti();
+    //   }, 500);
+    // }
   };
 
   // Sync props
@@ -109,22 +109,22 @@ export default function FiveDigitJackpot({
     };
     frame();
   };
-  useEffect(() => {
-    if (allStopped) {
-      playWin();
-      setTimeout(() => {
-        stopWin();
-      }, 1200);
-      const prizeIdx = prizes.length ? 0 : -1;
-      if (prizeIdx >= 0) {
-        addWinnerFromJackpot(prizeIdx);
-        setTimeout(() => {
-          playWin();
-          triggerConfetti();
-        }, 500);
-      }
-    }
-  }, [allStopped]);
+  // useEffect(() => {
+  //   if (allStopped) {
+  //     playWin();
+  //     setTimeout(() => {
+  //       stopWin();
+  //     }, 1200);
+  //     const prizeIdx = prizes.length ? 0 : -1;
+  //     if (prizeIdx >= 0) {
+  //       addWinnerFromJackpot(prizeIdx);
+  //       setTimeout(() => {
+  //         playWin();
+  //         triggerConfetti();
+  //       }, 500);
+  //     }
+  //   }
+  // }, [allStopped]);
   // useEffect(() => {
   //   const calculateSize = () => {
   //     if (!containerRef.current) return;
