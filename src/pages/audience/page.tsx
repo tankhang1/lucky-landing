@@ -329,12 +329,12 @@ export default function AudienceDeluxe() {
             >
               <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/40" />
               {last ? (
-                <div className="grid grid-cols-[200px_1fr] gap-4 items-center">
+                <div className="grid grid-cols-[300px_1fr] gap-4 items-center">
                   <div>
                     {last.gift_image ? (
                       <img
                         src={last.gift_image}
-                        className="w-44 object-contain"
+                        className="w-64 object-contain"
                       />
                     ) : (
                       <div className="h-44 w-44 rounded-xl bg-neutral-100" />
