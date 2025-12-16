@@ -14,18 +14,23 @@ import { Link } from "react-router-dom";
 import Logo from "@/assets/logo.png";
 import { useGetListCampaign } from "@/react-query/queries/campaign/campaign";
 import Loading from "@/assets/loading.gif";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import type { TCampaign } from "@/react-query/services/campaign/campaign.service";
 export default function Shell({ children }: { children: React.ReactNode }) {
   const { data: programs, isPending: isLoadingProgram } = useGetListCampaign();
   const programId = useDrawStore((s) => s.programId);
   const setProgramId = useDrawStore((s) => s.setProgramId);
   const setProgram = useDrawStore((s) => s.setProgram);
+  const [selectedProgram, setSelectedProgram] = useState<TCampaign | null>(
+    null
+  );
   const themeKey = (programs?.find((p) => p.id === programId)?.status ??
     1) as keyof typeof THEMES;
   useEffect(() => {
     if (programs && programs.length > 0) {
       setProgram(programs);
       setProgramId(programs[0].id);
+      setSelectedProgram(programs[0]);
     }
   }, [programs]);
   return (
@@ -42,7 +47,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3">
             <Select
               value={programId.toString()}
-              onValueChange={(value) => setProgramId(+value)}
+              onValueChange={(value) => {
+                setProgramId(+value);
+                setSelectedProgram(
+                  programs?.find((item) => item.id.toString() == value) || null
+                );
+              }}
             >
               <SelectTrigger className="w-72">
                 <SelectValue placeholder="Chọn chương trình" />
@@ -84,9 +94,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <Link to="/control">
               <Button variant="secondary">Control</Button>
             </Link>
-            <Link to="/audience">
-              <Button>Audience</Button>
-            </Link>
+            {selectedProgram && (
+              <Link
+                to={`/audience/${selectedProgram.code}/${selectedProgram.type}`}
+              >
+                <Button>Audience</Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>

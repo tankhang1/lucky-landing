@@ -15,7 +15,10 @@ export default function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/main" element={<HomePage />} />
         <Route path="/control" element={<ControlPage />} />
-        <Route path="/audience" element={<AudiencePage />} />
+        <Route
+          path="/audience/:campaign_code/:type"
+          element={<AudiencePage />}
+        />
         <Route path="/cage/control" element={<CageControlPage />} />
         <Route path="/cage/audience" element={<CageAudiencePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

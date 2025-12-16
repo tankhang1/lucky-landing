@@ -200,17 +200,6 @@ export default function ControlPage() {
           onSuccess: (res) => {
             showCage(normalized);
             showHistoryCage(normalized);
-            setCage("");
-            requestPublishEvent({
-              type: program.type,
-              data: JSON.stringify({
-                campaign_code: program.code,
-                gift_code: gift_code,
-                numb: +cage,
-                award_name: award_name,
-                type: program.type,
-              }),
-            });
 
             //@ts-expect-error no check
             alert(res?.message);
@@ -242,6 +231,25 @@ export default function ControlPage() {
       );
     }
   }, [program, selectedPrizeId, digitCount, cage, showCage]);
+  const handPublishEvent = () => {
+    if (!program) {
+      alert("Vui lòng chọn chương trình");
+      return;
+    }
+    const [gift_code, award_name] = selectedPrizeId.split("_");
+
+    requestPublishEvent({
+      type: program.type,
+      data: JSON.stringify({
+        campaign_code: program.code,
+        gift_code: gift_code,
+        numb: +cage,
+        award_name: award_name,
+        type: program.type,
+      }),
+    });
+    setCage("");
+  };
   useEffect(() => {
     if (prizes && prizes.length > 0) {
       setPrize(prizes);
@@ -609,14 +617,23 @@ export default function ControlPage() {
                                 Chọn số rồi bấm “Hiển thị”.
                               </CardDescription>
                             </div>
-                            <Button
-                              size="sm"
-                              className="h-9 rounded-lg px-4"
-                              onClick={handleShowCage}
-                              disabled={isLoadingRequest}
-                            >
-                              {isLoadingRequest ? "Đang xử lí..." : "Hiển thị"}
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                className="h-9 rounded-lg px-4"
+                                onClick={handleShowCage}
+                                disabled={isLoadingRequest}
+                              >
+                                {isLoadingRequest ? "Đang xử lí..." : "Chọn số"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="h-9 rounded-lg px-4"
+                                onClick={handPublishEvent}
+                              >
+                                Hiển thị
+                              </Button>
+                            </div>
                           </div>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -675,7 +692,8 @@ export default function ControlPage() {
                                 Chọn số rồi bấm “Hiển thị”.
                               </CardDescription>
                             </div>
-                            <div className="space-x-2">
+
+                            <div className="flex items-center gap-2">
                               <Button
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
@@ -685,6 +703,13 @@ export default function ControlPage() {
                                 {isLoadingRequestRandom
                                   ? "Đang xử lí..."
                                   : "Chọn số"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="h-9 rounded-lg px-4"
+                                onClick={handPublishEvent}
+                              >
+                                Hiển thị
                               </Button>
                             </div>
                           </div>
