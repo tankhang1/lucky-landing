@@ -263,8 +263,8 @@ export default function ControlPage() {
       setCage("");
     }
   };
-  const handleRandomPublishEvent = (data?: TLucky) => {
-    if (!data) {
+  const handleRandomPublishEvent = (value?: TLucky) => {
+    if (!value) {
       alert("Không có số trúng thưởng");
       return;
     }
@@ -280,10 +280,11 @@ export default function ControlPage() {
         type: program.type,
         data: JSON.stringify({
           campaign_code: program.code,
-          gift_code: data.gift_code,
-          numb: +data.numb,
-          award_name: data.award_name,
+          gift_code: value.gift_code,
+          numb: +value.numb,
+          award_name: value.award_name,
           type: program.type,
+          list: data?.data,
         }),
       });
       setCage("");

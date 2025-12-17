@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { ArrowLeft, Crown, Maximize2, Minimize2, Trophy } from "lucide-react";
@@ -14,10 +14,16 @@ import {
 } from "@/react-query/queries/campaign/campaign";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
-import type { TReceiveEvent } from "@/react-query/services/campaign/campaign.service";
+import type {
+  TGetListCampaignLuckyHistoryRes,
+  TLucky,
+  TReceiveEvent,
+} from "@/react-query/services/campaign/campaign.service";
 import AudienceBg from "@/assets/audience-theme.png";
 import CrownIcon from "@/assets/crown.png";
 import Logo from "@/assets/audience-logo.png";
+import queryClient from "@/react-query";
+import QUERY_KEY from "@/constants/key";
 export default function AudienceDeluxe() {
   const { campaign_code, type } = useParams();
   const stompClientRef = useRef<any>(null);
@@ -33,12 +39,16 @@ export default function AudienceDeluxe() {
   const { data: winners } = useGetListLuckyHistory({
     c: campaign_code || "",
   });
-  const prevCount = useRef(winners?.length || 0);
+  const [lucky, setLucky] = useState<TLucky[] | null>(null);
   const [flash, setFlash] = useState(false);
+  const [listWinners, setListWinner] =
+    useState<TGetListCampaignLuckyHistoryRes>([]);
+  const prevCount = useRef(listWinners?.length || 0);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tableWrapRef = useRef<HTMLDivElement | null>(null);
   const firstRowRef = useRef<HTMLTableRowElement | null>(null);
-  const last = winners?.[0];
+  const last = useMemo(() => listWinners?.[0], [listWinners]);
   const [isFull, setIsFull] = useState(false);
   const toggleFullScreen = async () => {
     const el = containerRef.current;
@@ -59,7 +69,7 @@ export default function AudienceDeluxe() {
   }, []);
 
   useEffect(() => {
-    if (winners && winners.length > prevCount.current) {
+    if (listWinners && listWinners.length > prevCount.current) {
       confetti({ particleCount: 160, spread: 85, origin: { y: 0.28 } });
       setFlash(true);
       const t = setTimeout(() => setFlash(false), 2200);
@@ -68,10 +78,13 @@ export default function AudienceDeluxe() {
         behavior: "smooth",
         block: "nearest",
       });
-      prevCount.current = winners.length;
+      prevCount.current = listWinners.length;
       return () => clearTimeout(t);
     }
-    prevCount.current = winners?.length || 0;
+    prevCount.current = listWinners?.length || 0;
+  }, [listWinners]);
+  useEffect(() => {
+    setListWinner(winners || []);
   }, [winners]);
   useEffect(() => {
     const connect = () => {
@@ -102,6 +115,11 @@ export default function AudienceDeluxe() {
             console.log("Received message", message);
             if (message?.body) {
               try {
+                if (type === "0") {
+                  queryClient.invalidateQueries({
+                    queryKey: [QUERY_KEY.CAMPAGIN.LIST_LUCKY_HISTORY],
+                  });
+                }
                 setReceivedEvent(JSON.parse(message.body) as TReceiveEvent);
               } catch (e) {
                 console.error("Error parsing JSON", e);
@@ -136,6 +154,24 @@ export default function AudienceDeluxe() {
       }
     };
   }, [type]);
+  const onComplete = () => {
+    if (receivedEvent?.list)
+      setListWinner([
+        ...receivedEvent?.list?.map((item) => ({
+          number: item.numb,
+          consumer_name: item.consumer_name,
+          award_name: item.award_name,
+          gift_image: item.gift_image,
+          consumer_code: item.consumer_code,
+          gift_name: item.gift_name,
+          consumer_phone: item.consumer_phone,
+          time: item.time_get,
+          award_time: item.award_time,
+        })),
+        ...listWinners,
+      ]);
+    if (receivedEvent) setReceivedEvent({ ...receivedEvent, list: undefined });
+  };
 
   console.log("receive", receivedEvent);
   return (
@@ -177,6 +213,7 @@ export default function AudienceDeluxe() {
                   receivedEvent?.numb?.toString()?.padStart(5, "0") || "00000"
                 }
                 type={type || ""}
+                onComplete={onComplete}
               />
             </div>
             {/* <div className="text-center text-[#0F392B] text-xl mt-[-10px] font-medium">
@@ -230,7 +267,7 @@ export default function AudienceDeluxe() {
                   <div>
                     {last.gift_image ? (
                       <img
-                        src={last.gift_image}
+                        src={`${last.gift_image}?t=${new Date().getTime()}`}
                         className="w-44 object-contain"
                       />
                     ) : (
@@ -255,7 +292,7 @@ export default function AudienceDeluxe() {
               )}
             </motion.div>
 
-            <WinnersTicker items={winners} dot={THEMES[1].dot} />
+            <WinnersTicker items={listWinners} dot={THEMES[1].dot} />
 
             <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
               <div ref={tableWrapRef} className="max-h-[50vh] overflow-auto">
@@ -271,7 +308,7 @@ export default function AudienceDeluxe() {
                     </tr>
                   </thead>
                   <tbody className="text-lg">
-                    {winners?.map((w, idx) => (
+                    {listWinners?.map((w, idx) => (
                       <tr
                         key={idx}
                         ref={idx === 0 ? firstRowRef : undefined}
@@ -289,7 +326,7 @@ export default function AudienceDeluxe() {
                         <td className="p-3 text-center">{w.consumer_phone}</td>
                       </tr>
                     ))}
-                    {!winners?.length && (
+                    {!listWinners?.length && (
                       <tr>
                         <td
                           colSpan={6}
@@ -354,7 +391,7 @@ export default function AudienceDeluxe() {
                   <div>
                     {last.gift_image ? (
                       <img
-                        src={last.gift_image}
+                        src={`${last.gift_image}?t=${new Date().getTime()}`}
                         className="w-64 object-contain"
                       />
                     ) : (
@@ -381,7 +418,7 @@ export default function AudienceDeluxe() {
           </div>
 
           <div className="w-full lg:w-[50%] flex flex-col gap-6">
-            <WinnersTicker items={winners} dot={THEMES[1].dot} />
+            <WinnersTicker items={listWinners} dot={THEMES[1].dot} />
 
             <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
               <div ref={tableWrapRef} className="max-h-[50vh] overflow-auto">
@@ -397,7 +434,7 @@ export default function AudienceDeluxe() {
                     </tr>
                   </thead>
                   <tbody className="text-lg">
-                    {winners?.map((w, idx) => (
+                    {listWinners?.map((w, idx) => (
                       <tr
                         key={idx}
                         ref={idx === 0 ? firstRowRef : undefined}
@@ -415,7 +452,7 @@ export default function AudienceDeluxe() {
                         <td className="p-3 text-center">{w.consumer_phone}</td>
                       </tr>
                     ))}
-                    {!winners?.length && (
+                    {!listWinners?.length && (
                       <tr>
                         <td
                           colSpan={6}

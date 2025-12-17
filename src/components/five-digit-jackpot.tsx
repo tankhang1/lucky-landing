@@ -13,10 +13,12 @@ export default function FiveDigitJackpot({
   isControl = false,
   number,
   type,
+  onComplete,
 }: {
   isControl?: boolean;
   number: string;
   type: string;
+  onComplete: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dynamicSize, setDynamicSize] = useState(160);
@@ -125,9 +127,7 @@ export default function FiveDigitJackpot({
       //     triggerConfetti();
       //   }, 500);
       // }
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.CAMPAGIN.LIST_LUCKY_HISTORY],
-      });
+      onComplete();
     }
   }, [allStopped]);
   // useEffect(() => {

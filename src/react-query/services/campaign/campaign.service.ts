@@ -195,6 +195,7 @@ export type TReceiveEvent = {
   numb: string;
   award_name: string;
   type: string;
+  list?: TLucky[];
 };
 
 export const requestPublishEvent = async (
