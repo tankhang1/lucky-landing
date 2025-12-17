@@ -33,6 +33,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import LuckyTicketCard from "./components/lucky-card";
 import type { TLucky } from "@/react-query/services/campaign/campaign.service";
+import queryClient from "@/react-query";
+import QUERY_KEY from "@/constants/key";
 function CagePreview({
   value,
   count = 5,
@@ -139,7 +141,7 @@ export default function ControlPage() {
   const {
     mutate: requestLuckyRandom,
     isPending: isLoadingRequestRandom,
-    data,
+    data: luckyRandom,
   } = useRequestLuckyRandom();
   const { mutate: requestPublishEvent } = useRequestPublishEvent();
   const prizes = useDrawStore((s) => s.prizes);
@@ -206,7 +208,9 @@ export default function ControlPage() {
             onSuccess: (res) => {
               showCage(normalized);
               showHistoryCage(normalized);
-
+              queryClient.invalidateQueries({
+                queryKey: [QUERY_KEY.CAMPAGIN.LIST_GIFT],
+              });
               //@ts-expect-error no check
               alert(res?.message);
             },
@@ -284,7 +288,7 @@ export default function ControlPage() {
           numb: +value.numb,
           award_name: value.award_name,
           type: program.type,
-          list: data?.data,
+          list: luckyRandom?.data,
         }),
       });
       setCage("");
@@ -754,7 +758,9 @@ export default function ControlPage() {
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
                                 onClick={() =>
-                                  handleRandomPublishEvent(data?.data?.[0])
+                                  handleRandomPublishEvent(
+                                    luckyRandom?.data?.[0]
+                                  )
                                 }
                                 disabled={program?.status !== 1}
                               >
@@ -768,8 +774,9 @@ export default function ControlPage() {
                             {randomMessage}
                           </div>
                           <div className="flex flex-col gap-3 px-4 pb-4 pt-2">
-                            {data?.data && data.data.length > 0 ? (
-                              data.data.map((item: TLucky) => (
+                            {luckyRandom?.data &&
+                            luckyRandom.data.length > 0 ? (
+                              luckyRandom.data.map((item: TLucky) => (
                                 <LuckyTicketCard key={item.id} item={item} />
                               ))
                             ) : (

@@ -117,18 +117,6 @@ export type TRequestLuckyManualReq = {
   numb: number;
   gift_code: string;
 };
-
-export type TRequestLuckyManualRes = {};
-export const requestLuckyManual = async (
-  body: TRequestLuckyManualReq
-): Promise<TRequestLuckyManualRes> => {
-  const { data } = await api.post(PATH.CAMPAIGN.REQUEST_LUCKY_MANUAL, body);
-  return data;
-};
-
-export type TRequestLuckyRandomReq = {
-  campaign_code: string;
-};
 export type TLucky = {
   id: number;
   campaign_uuid: string;
@@ -149,6 +137,20 @@ export type TLucky = {
   order_number: number;
   gift_price: number;
 };
+export type TRequestLuckyManualRes = {
+  data: TLucky[];
+};
+export const requestLuckyManual = async (
+  body: TRequestLuckyManualReq
+): Promise<TRequestLuckyManualRes> => {
+  const { data } = await api.post(PATH.CAMPAIGN.REQUEST_LUCKY_MANUAL, body);
+  return data;
+};
+
+export type TRequestLuckyRandomReq = {
+  campaign_code: string;
+};
+
 export type TRequestLuckyRandomRes = {
   data: TLucky[];
   message: string;

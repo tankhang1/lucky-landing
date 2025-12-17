@@ -115,12 +115,13 @@ export default function AudienceDeluxe() {
             console.log("Received message", message);
             if (message?.body) {
               try {
+                const parsedData = JSON.parse(message.body) as TReceiveEvent;
                 if (type === "0") {
                   queryClient.invalidateQueries({
                     queryKey: [QUERY_KEY.CAMPAGIN.LIST_LUCKY_HISTORY],
                   });
                 }
-                setReceivedEvent(JSON.parse(message.body) as TReceiveEvent);
+                setReceivedEvent(parsedData);
               } catch (e) {
                 console.error("Error parsing JSON", e);
               }
@@ -173,7 +174,7 @@ export default function AudienceDeluxe() {
     if (receivedEvent) setReceivedEvent({ ...receivedEvent, list: undefined });
   };
 
-  console.log("receive", receivedEvent);
+  console.log("receive", receivedEvent, receivedEvent);
   return (
     <div
       ref={containerRef}
