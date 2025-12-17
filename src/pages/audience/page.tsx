@@ -2,7 +2,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { ArrowLeft, Crown, Maximize2, Minimize2, Trophy } from "lucide-react";
+import {
+  ArrowLeft,
+  Crown,
+  Loader2,
+  Maximize2,
+  Minimize2,
+  Trophy,
+} from "lucide-react";
 import FiveDigitJackpot from "@/components/five-digit-jackpot";
 import WinnersTicker from "@/components/draw/WinnersTicker";
 import { THEMES } from "@/lib/type";
@@ -32,6 +39,7 @@ export default function AudienceDeluxe() {
   const [receivedEvent, setReceivedEvent] = useState<TReceiveEvent | null>(
     null
   );
+  const [isConnectingSocket, setIsConnectingSocket] = useState(false);
 
   const { data: gifts } = useGetListGiftCampaign({
     c: campaign_code || "",
@@ -98,10 +106,11 @@ export default function AudienceDeluxe() {
 
       // Optional: Disable debug logs if they are too noisy
       // client.debug = () => {};
-
+      setIsConnectingSocket(true);
       client.connect(
         {},
         () => {
+          setIsConnectingSocket(false);
           console.log("Connected Successfully");
           stompClientRef.current = client;
 
@@ -129,6 +138,7 @@ export default function AudienceDeluxe() {
           });
         },
         (error) => {
+          setIsConnectingSocket(true);
           console.error("Connection lost or failed:", error);
 
           // Retry after 5 seconds
@@ -154,7 +164,7 @@ export default function AudienceDeluxe() {
         stompClientRef.current.disconnect(() => console.log("Disconnected"));
       }
     };
-  }, [type]);
+  }, [type, setIsConnectingSocket]);
   const onComplete = () => {
     if (receivedEvent?.list)
       setListWinner([
@@ -174,7 +184,7 @@ export default function AudienceDeluxe() {
     if (receivedEvent) setReceivedEvent({ ...receivedEvent, list: undefined });
   };
 
-  console.log("receive", receivedEvent, receivedEvent);
+  console.log("receive", receivedEvent, receivedEvent, isConnectingSocket);
   return (
     <div
       ref={containerRef}
@@ -184,6 +194,14 @@ export default function AudienceDeluxe() {
         className="absolute inset-0 bg-no-repeat bg-[length:100%_100%]"
         style={{ backgroundImage: `url(${AudienceBg})` }}
       />
+      <div className="absolute top-2 right-16 z-50 p-2">
+        {isConnectingSocket && (
+          <div className="flex items-center gap-2 text-black">
+            <Loader2 className="animate-spin" />
+            Socket Connecting...
+          </div>
+        )}
+      </div>
       {type == "1" ? (
         <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
           <img src={Logo} className="w-96 absolute top-0" />
@@ -374,6 +392,7 @@ export default function AudienceDeluxe() {
                   <Maximize2 className="h-5 w-5 text-neutral-700" />
                 )}
               </button>
+
               {/* <button
               onClick={() => navigate("/control")}
               className="absolute top-4 left-4 z-50 p-2"
