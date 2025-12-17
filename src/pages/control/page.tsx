@@ -630,7 +630,9 @@ export default function ControlPage() {
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
                                 onClick={handleShowCage}
-                                disabled={isLoadingRequest}
+                                disabled={
+                                  isLoadingRequest || program?.status !== 1
+                                }
                               >
                                 {isLoadingRequest ? "Đang xử lí..." : "Chọn số"}
                               </Button>
@@ -638,6 +640,7 @@ export default function ControlPage() {
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
                                 onClick={handPublishEvent}
+                                disabled={program?.status !== 1}
                               >
                                 Hiển thị
                               </Button>
@@ -706,7 +709,10 @@ export default function ControlPage() {
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
                                 onClick={handleShowCage}
-                                disabled={isLoadingRequestRandom}
+                                disabled={
+                                  isLoadingRequestRandom ||
+                                  program?.status !== 1
+                                }
                               >
                                 {isLoadingRequestRandom
                                   ? "Đang xử lí..."
@@ -716,6 +722,7 @@ export default function ControlPage() {
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
                                 onClick={handPublishEvent}
+                                disabled={program?.status !== 1}
                               >
                                 Hiển thị
                               </Button>
