@@ -30,6 +30,14 @@ export type Winner = {
 };
 
 export const THEMES = {
+  0: {
+    pageBg:
+      "bg-[radial-gradient(85%_70%_at_50%_-10%,rgba(244,63,94,.18),transparent_60%)]",
+    header: "from-rose-50 via-amber-50 to-yellow-50",
+    title:
+      "bg-[conic-gradient(at_50%_50%,#ef4444_0%,#f59e0b_35%,#facc15_70%,#ef4444_100%)]",
+    dot: "bg-amber-500",
+  },
   1: {
     pageBg:
       "bg-[radial-gradient(85%_70%_at_50%_-10%,rgba(244,63,94,.18),transparent_60%)]",

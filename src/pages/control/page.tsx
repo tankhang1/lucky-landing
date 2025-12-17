@@ -190,45 +190,49 @@ export default function ControlPage() {
       });
 
       const [gift_code, award_name] = selectedPrizeId.split("_");
-      requestLucky(
-        {
-          campaign_code: program.code,
-          gift_code: gift_code,
-          numb: +cage,
-        },
-        {
-          onSuccess: (res) => {
-            showCage(normalized);
-            showHistoryCage(normalized);
+      if (confirm(`Bạn có xác nhận chọn số ${cage}?`)) {
+        requestLucky(
+          {
+            campaign_code: program.code,
+            gift_code: gift_code,
+            numb: +cage,
+          },
+          {
+            onSuccess: (res) => {
+              showCage(normalized);
+              showHistoryCage(normalized);
 
-            //@ts-expect-error no check
-            alert(res?.message);
-          },
-          onError: () => {
-            alert("Nhập số thất bại");
-          },
-        }
-      );
+              //@ts-expect-error no check
+              alert(res?.message);
+            },
+            onError: () => {
+              alert("Nhập số thất bại");
+            },
+          }
+        );
+      }
     } else {
       if (!program?.code) {
         alert("Vui lòng chọn chương trình");
         return;
       }
       setRandomMessage("");
-      requestLuckyRandom(
-        {
-          campaign_code: program.code,
-        },
-        {
-          onSuccess: (res) => {
-            console.log(res);
-            setRandomMessage(res.message);
+      if (confirm(`Bạn có chắc chắn thực hiện chọn số ngẫu?`)) {
+        requestLuckyRandom(
+          {
+            campaign_code: program.code,
           },
-          onError: () => {
-            alert("Nhập số thất bại");
-          },
-        }
-      );
+          {
+            onSuccess: (res) => {
+              console.log(res);
+              setRandomMessage(res.message);
+            },
+            onError: () => {
+              alert("Nhập số thất bại");
+            },
+          }
+        );
+      }
     }
   }, [program, selectedPrizeId, digitCount, cage, showCage]);
   const handPublishEvent = () => {
@@ -238,17 +242,21 @@ export default function ControlPage() {
     }
     const [gift_code, award_name] = selectedPrizeId.split("_");
 
-    requestPublishEvent({
-      type: program.type,
-      data: JSON.stringify({
-        campaign_code: program.code,
-        gift_code: gift_code,
-        numb: +cage,
-        award_name: award_name,
+    if (
+      confirm(`Bạn có chắc chắn muốn hiển thị số ${cage} ở màn hình khách hàng`)
+    ) {
+      requestPublishEvent({
         type: program.type,
-      }),
-    });
-    setCage("");
+        data: JSON.stringify({
+          campaign_code: program.code,
+          gift_code: gift_code,
+          numb: +cage,
+          award_name: award_name,
+          type: program.type,
+        }),
+      });
+      setCage("");
+    }
   };
   useEffect(() => {
     if (prizes && prizes.length > 0) {
@@ -486,7 +494,7 @@ export default function ControlPage() {
                           }`}
                         >
                           {/* --- Phần Header Chứa Ảnh --- */}
-                          <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 p-6 flex items-center justify-center border-b border-slate-100">
+                          <div className="relative aspect-[4/3] overflow-hidden flex items-center justify-center border-b border-slate-100">
                             {/* Tên Giải Thưởng (Badge nổi) */}
                             <div className="absolute top-3 left-3 z-10">
                               <Badge
