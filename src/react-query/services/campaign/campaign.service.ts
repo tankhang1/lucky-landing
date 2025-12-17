@@ -129,9 +129,28 @@ export const requestLuckyManual = async (
 export type TRequestLuckyRandomReq = {
   campaign_code: string;
 };
-
+export type TLucky = {
+  id: number;
+  campaign_uuid: string;
+  campaign_code: string;
+  campaign_name: string;
+  numb: number;
+  time_get: string;
+  time_get_number: number;
+  consumer_code: any;
+  consumer_name: any;
+  consumer_phone: string;
+  award_name: string;
+  award_time: string;
+  award_time_number: number;
+  gift_code: string;
+  gift_name: string;
+  gift_image: string;
+  order_number: number;
+  gift_price: number;
+};
 export type TRequestLuckyRandomRes = {
-  data: any;
+  data: TLucky[];
   message: string;
 };
 export const requestLuckyRandom = async (

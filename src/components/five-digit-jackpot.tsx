@@ -1,12 +1,14 @@
 // components/draw/FiveDigitJackpot.tsx
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useSound from "use-sound";
 import confetti from "canvas-confetti";
 import { useDrawStore } from "@/lib/store";
 import DigitReel from "./digit-flip";
 import { Button } from "./ui/button";
 import LuckyNumberBg from "@/assets/lucky-number.png";
+import queryClient from "@/react-query";
+import QUERY_KEY from "@/constants/key";
 export default function FiveDigitJackpot({
   isControl = false,
   number,
@@ -37,7 +39,7 @@ export default function FiveDigitJackpot({
     volume: 1,
   }); // Optional: Add a win sound
 
-  const allStopped = active.every((a) => !a);
+  const allStopped = useMemo(() => active.every((a) => !a), [active]);
   const numberStr = stopNumbers.join("");
 
   // --- Logic: Start/Stop ---
@@ -109,22 +111,25 @@ export default function FiveDigitJackpot({
     };
     frame();
   };
-  // useEffect(() => {
-  //   if (allStopped) {
-  //     playWin();
-  //     setTimeout(() => {
-  //       stopWin();
-  //     }, 1200);
-  //     const prizeIdx = prizes.length ? 0 : -1;
-  //     if (prizeIdx >= 0) {
-  //       addWinnerFromJackpot(prizeIdx);
-  //       setTimeout(() => {
-  //         playWin();
-  //         triggerConfetti();
-  //       }, 500);
-  //     }
-  //   }
-  // }, [allStopped]);
+  useEffect(() => {
+    if (allStopped) {
+      // playWin();
+      // setTimeout(() => {
+      //   stopWin();
+      // }, 1200);
+      // const prizeIdx = prizes.length ? 0 : -1;
+      // if (prizeIdx >= 0) {
+      //   addWinnerFromJackpot(prizeIdx);
+      //   setTimeout(() => {
+      //     playWin();
+      //     triggerConfetti();
+      //   }, 500);
+      // }
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.CAMPAGIN.LIST_LUCKY_HISTORY],
+      });
+    }
+  }, [allStopped]);
   // useEffect(() => {
   //   const calculateSize = () => {
   //     if (!containerRef.current) return;
@@ -171,11 +176,11 @@ export default function FiveDigitJackpot({
                 size={dynamicSize}
                 speed={700 + i * 60}
                 extraTurns={2}
-                onClick={() =>
+                onClick={() => {
                   setActive((prev) =>
                     prev.map((v, idx) => (idx === i ? !v : v))
-                  )
-                }
+                  );
+                }}
               />
             ))}
           </div>

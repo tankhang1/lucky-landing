@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, Gift, Hash, Trophy, Users } from "lucide-react";
+import { AlertCircle, Gift, Hash, Ticket, Trophy, Users } from "lucide-react";
 import confetti from "canvas-confetti";
 import { THEMES } from "@/lib/type";
 import { useDrawStore } from "@/lib/store";
@@ -31,6 +31,8 @@ import {
   useRequestPublishEvent,
 } from "@/react-query/queries/campaign/campaign";
 import { Badge } from "@/components/ui/badge";
+import LuckyTicketCard from "./components/lucky-card";
+import type { TLucky } from "@/react-query/services/campaign/campaign.service";
 function CagePreview({
   value,
   count = 5,
@@ -134,8 +136,11 @@ export default function ControlPage() {
   });
   const { mutate: requestLucky, isPending: isLoadingRequest } =
     useRequestLuckyManual();
-  const { mutate: requestLuckyRandom, isPending: isLoadingRequestRandom } =
-    useRequestLuckyRandom();
+  const {
+    mutate: requestLuckyRandom,
+    isPending: isLoadingRequestRandom,
+    data,
+  } = useRequestLuckyRandom();
   const { mutate: requestPublishEvent } = useRequestPublishEvent();
   const prizes = useDrawStore((s) => s.prizes);
   const setPrize = useDrawStore((s) => s.setPrize);
@@ -252,6 +257,32 @@ export default function ControlPage() {
           gift_code: gift_code,
           numb: +cage,
           award_name: award_name,
+          type: program.type,
+        }),
+      });
+      setCage("");
+    }
+  };
+  const handleRandomPublishEvent = (data?: TLucky) => {
+    if (!data) {
+      alert("Không có số trúng thưởng");
+      return;
+    }
+    if (!program) {
+      alert("Vui lòng chọn chương trình");
+      return;
+    }
+
+    if (
+      confirm(`Bạn có chắc chắn muốn hiển thị số ${cage} ở màn hình khách hàng`)
+    ) {
+      requestPublishEvent({
+        type: program.type,
+        data: JSON.stringify({
+          campaign_code: program.code,
+          gift_code: data.gift_code,
+          numb: +data.numb,
+          award_name: data.award_name,
           type: program.type,
         }),
       });
@@ -721,7 +752,9 @@ export default function ControlPage() {
                               <Button
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
-                                onClick={handPublishEvent}
+                                onClick={() =>
+                                  handleRandomPublishEvent(data?.data?.[0])
+                                }
                                 disabled={program?.status !== 1}
                               >
                                 Hiển thị
@@ -730,8 +763,27 @@ export default function ControlPage() {
                           </div>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="text-2xl font-medium">
+                          <div className="text-xl font-medium">
                             {randomMessage}
+                          </div>
+                          <div className="flex flex-col gap-3 px-4 pb-4 pt-2">
+                            {data?.data && data.data.length > 0 ? (
+                              data.data.map((item: TLucky) => (
+                                <LuckyTicketCard key={item.id} item={item} />
+                              ))
+                            ) : (
+                              // Empty State
+                              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                                <Ticket
+                                  size={48}
+                                  strokeWidth={1}
+                                  className="mb-2 opacity-50"
+                                />
+                                <span className="text-sm">
+                                  Chưa có thông tin trúng thưởng
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </CardContent>
                       </Card>

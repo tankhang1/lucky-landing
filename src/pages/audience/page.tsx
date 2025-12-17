@@ -20,6 +20,8 @@ import CrownIcon from "@/assets/crown.png";
 import Logo from "@/assets/audience-logo.png";
 export default function AudienceDeluxe() {
   const { campaign_code, type } = useParams();
+  const stompClientRef = useRef<any>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
   const [receivedEvent, setReceivedEvent] = useState<TReceiveEvent | null>(
     null
@@ -72,46 +74,65 @@ export default function AudienceDeluxe() {
     prevCount.current = winners?.length || 0;
   }, [winners]);
   useEffect(() => {
-    const socket = new SockJS("https://mps-api.vmarketing.vn/socket");
-    const stompClient = Stomp.over(socket);
-
-    stompClient.connect(
-      {},
-      () => {
-        console.log("Connected");
-        // subscribe / send here
-        if (type === "0") {
-          stompClient.subscribe(
-            "/landingpage/manual/update-award",
-            (message) => {
-              console.log("Received message", message);
-              if (message?.body) {
-                console.log(message.body);
-                setReceivedEvent(JSON.parse(message.body) as TReceiveEvent);
-              }
-            }
-          );
-        } else {
-          stompClient.subscribe(
-            "/landingpage/random/update-award",
-            (message) => {
-              console.log("Received message", message);
-              if (message?.body) {
-                console.log(message.body);
-                setReceivedEvent(JSON.parse(message.body) as TReceiveEvent);
-              }
-            }
-          );
-        }
-      },
-      (error) => {
-        console.error("Connection error:", error);
+    const connect = () => {
+      // Clean up existing client before creating a new one
+      if (stompClientRef.current && stompClientRef.current.connected) {
+        stompClientRef.current.disconnect();
       }
-    );
 
+      const socket = new SockJS("https://mps-api.vmarketing.vn/socket");
+      const client = Stomp.over(socket);
+
+      // Optional: Disable debug logs if they are too noisy
+      // client.debug = () => {};
+
+      client.connect(
+        {},
+        () => {
+          console.log("Connected Successfully");
+          stompClientRef.current = client;
+
+          // Subscribe based on type
+          const topic =
+            type === "0"
+              ? "/landingpage/manual/update-award"
+              : "/landingpage/random/update-award";
+
+          client.subscribe(topic, (message) => {
+            console.log("Received message", message);
+            if (message?.body) {
+              try {
+                setReceivedEvent(JSON.parse(message.body) as TReceiveEvent);
+              } catch (e) {
+                console.error("Error parsing JSON", e);
+              }
+            }
+          });
+        },
+        (error) => {
+          console.error("Connection lost or failed:", error);
+
+          // Retry after 5 seconds
+          reconnectTimeoutRef.current = setTimeout(() => {
+            console.log("Attempting to reconnect...");
+            connect();
+          }, 5000);
+        }
+      );
+    };
+
+    connect();
+
+    // Cleanup function
     return () => {
-      if (stompClient && stompClient.connected) {
-        stompClient.disconnect(() => console.log("Disconnected"));
+      // Clear any pending reconnect attempts
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+
+      // Disconnect cleanly
+      if (stompClientRef.current && stompClientRef.current.connected) {
+        stompClientRef.current.disconnect(() => console.log("Disconnected"));
       }
     };
   }, [type]);
