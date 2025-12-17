@@ -48,7 +48,7 @@ export default function AudienceDeluxe() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tableWrapRef = useRef<HTMLDivElement | null>(null);
   const firstRowRef = useRef<HTMLTableRowElement | null>(null);
-  const last = useMemo(() => listWinners?.[0], [listWinners]);
+
   const [isFull, setIsFull] = useState(false);
   const toggleFullScreen = async () => {
     const el = containerRef.current;
@@ -262,12 +262,14 @@ export default function AudienceDeluxe() {
               )}
             >
               <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/40" />
-              {last ? (
+              {listWinners?.[0] ? (
                 <div className="grid grid-cols-[200px_1fr] gap-4 items-center">
                   <div>
-                    {last.gift_image ? (
+                    {listWinners?.[0]?.gift_image ? (
                       <img
-                        src={`${last.gift_image}?t=${new Date().getTime()}`}
+                        src={`${
+                          listWinners?.[0]?.gift_image
+                        }?t=${new Date().getTime()}`}
                         className="w-44 object-contain"
                       />
                     ) : (
@@ -276,15 +278,21 @@ export default function AudienceDeluxe() {
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm md:text-base">
                     <div className="text-neutral-500">Giải</div>
-                    <div className="font-semibold">{last.award_name}</div>
+                    <div className="font-semibold">
+                      {listWinners?.[0]?.award_name}
+                    </div>
                     <div className="text-neutral-500">Tên</div>
                     <div className="font-semibold">
-                      {last.consumer_name ?? "—"}
+                      {listWinners?.[0]?.consumer_name ?? "—"}
                     </div>
                     <div className="text-neutral-500">SĐT</div>
-                    <div className="font-mono">{last.consumer_phone}</div>
+                    <div className="font-mono">
+                      {listWinners?.[0]?.consumer_phone}
+                    </div>
                     <div className="text-neutral-500">Thời gian</div>
-                    <div>{new Date(last.time).toLocaleString()}</div>
+                    <div>
+                      {new Date(listWinners?.[0]?.time).toLocaleString()}
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -386,12 +394,14 @@ export default function AudienceDeluxe() {
               )}
             >
               <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/40" />
-              {last ? (
+              {listWinners?.[0] ? (
                 <div className="grid grid-cols-[300px_1fr] gap-4 items-center">
                   <div>
-                    {last.gift_image ? (
+                    {listWinners?.[0]?.gift_image ? (
                       <img
-                        src={`${last.gift_image}?t=${new Date().getTime()}`}
+                        src={`${
+                          listWinners?.[0]?.gift_image
+                        }?t=${new Date().getTime()}`}
                         className="w-64 object-contain"
                       />
                     ) : (
@@ -400,15 +410,21 @@ export default function AudienceDeluxe() {
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm md:text-base">
                     <div className="text-neutral-500">Giải</div>
-                    <div className="font-semibold">{last.award_name}</div>
+                    <div className="font-semibold">
+                      {listWinners?.[0]?.award_name}
+                    </div>
                     <div className="text-neutral-500">Tên</div>
                     <div className="font-semibold">
-                      {last.consumer_name ?? "—"}
+                      {listWinners?.[0]?.consumer_name ?? "—"}
                     </div>
                     <div className="text-neutral-500">SĐT</div>
-                    <div className="font-mono">{last.consumer_phone}</div>
+                    <div className="font-mono">
+                      {listWinners?.[0]?.consumer_phone}
+                    </div>
                     <div className="text-neutral-500">Thời gian</div>
-                    <div>{new Date(last.time).toLocaleString()}</div>
+                    <div>
+                      {new Date(listWinners?.[0]?.time).toLocaleString()}
+                    </div>
                   </div>
                 </div>
               ) : (
