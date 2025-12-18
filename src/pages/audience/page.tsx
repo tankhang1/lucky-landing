@@ -240,7 +240,7 @@ export default function AudienceDeluxe() {
           </div> */}
           </div>
 
-          <div className="w-full lg:w-[40%] flex flex-col gap-6">
+          <div className="w-full lg:w-[40%] flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img src={CrownIcon} className="w-14" />
@@ -295,7 +295,7 @@ export default function AudienceDeluxe() {
                       <div className="h-44 w-44 rounded-xl bg-neutral-100" />
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-sm md:text-base">
+                  <div className="grid grid-cols-[100px_1fr] gap-3 text-sm md:text-base">
                     <div className="text-neutral-500">Giải</div>
                     <div className="font-semibold">
                       {listWinners?.[0]?.award_name}
@@ -322,7 +322,7 @@ export default function AudienceDeluxe() {
             <WinnersTicker items={listWinners} dot={THEMES[1].dot} />
 
             <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
-              <div ref={tableWrapRef} className="max-h-[50vh] overflow-auto">
+              <div ref={tableWrapRef} className="max-h-[45vh] overflow-auto">
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 bg-[#428C57]">
                     <tr className="text-lg text-white">
@@ -428,7 +428,7 @@ export default function AudienceDeluxe() {
                       <div className="h-44 w-44 rounded-xl bg-neutral-100" />
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-sm md:text-base">
+                  <div className="grid grid-cols-[100px_1fr] gap-3 text-sm md:text-base">
                     <div className="text-neutral-500">Giải</div>
                     <div className="font-semibold">
                       {listWinners?.[0]?.award_name}
