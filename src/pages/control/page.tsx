@@ -35,6 +35,14 @@ import LuckyTicketCard from "./components/lucky-card";
 import type { TLucky } from "@/react-query/services/campaign/campaign.service";
 import queryClient from "@/react-query";
 import QUERY_KEY from "@/constants/key";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 function CagePreview({
   value,
   count = 5,
@@ -225,15 +233,21 @@ export default function ControlPage() {
         alert("Vui lòng chọn chương trình");
         return;
       }
+      const [gift_code, award_name] = selectedPrizeId.split("_");
+
       setRandomMessage("");
       if (confirm(`Bạn có chắc chắn thực hiện chọn số ngẫu?`)) {
         requestLuckyRandom(
           {
             campaign_code: program.code,
+            gift_code: gift_code,
           },
           {
             onSuccess: (res) => {
               console.log(res);
+              queryClient.invalidateQueries({
+                queryKey: [QUERY_KEY.CAMPAGIN.LIST_GIFT],
+              });
               setRandomMessage(res.message);
             },
             onError: () => {
@@ -739,7 +753,33 @@ export default function ControlPage() {
                                 Chọn số rồi bấm “Hiển thị”.
                               </CardDescription>
                             </div>
-
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-end gap-4 justify-between">
+                            <div className="flex w-full flex-col space-y-2">
+                              <Label className="text-slate-600 font-semibold text-xs uppercase tracking-wider">
+                                Giải thưởng
+                              </Label>
+                              <Select
+                                value={selectedPrizeId}
+                                onValueChange={setSelectedPrizeId}
+                              >
+                                <SelectTrigger className="w-full h-10 bg-white border-slate-200">
+                                  <SelectValue placeholder="Chọn giải..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {gifts?.map((p) => (
+                                    <SelectItem
+                                      key={`${p.gift_code}_${p.award_name}`}
+                                      value={`${p.gift_code}_${p.award_name}`}
+                                    >
+                                      {p.gift_name} (SL: {p.counter}/{p.limits})
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                             <div className="flex items-center gap-2">
                               <Button
                                 size="sm"
@@ -768,12 +808,10 @@ export default function ControlPage() {
                               </Button>
                             </div>
                           </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
                           <div className="text-xl font-medium">
                             {randomMessage}
                           </div>
-                          <div className="flex flex-col gap-3 px-4 pb-4 pt-2">
+                          <div className="flex flex-col gap-3 pb-4 pt-2">
                             {luckyRandom?.data &&
                             luckyRandom.data.length > 0 ? (
                               luckyRandom.data.map((item: TLucky) => (

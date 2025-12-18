@@ -149,6 +149,7 @@ export const requestLuckyManual = async (
 
 export type TRequestLuckyRandomReq = {
   campaign_code: string;
+  gift_code: string;
 };
 
 export type TRequestLuckyRandomRes = {
