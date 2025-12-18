@@ -101,6 +101,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                 <Button>Audience</Button>
               </Link>
             )}
+            {selectedProgram && (
+              <Link
+                to={`/audience-v1/${selectedProgram.code}/${selectedProgram.type}`}
+              >
+                <Button>Audience (V1)</Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>

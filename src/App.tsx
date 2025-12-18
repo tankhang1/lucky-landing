@@ -7,6 +7,7 @@ import CageAudiencePage from "./components/cage/audience/page";
 import { QueryClientProvider } from "@tanstack/react-query";
 import queryClient from "./react-query";
 import LoginPage from "./pages/login";
+import AudienceV1Page from "./pages/audience-v1/page";
 
 export default function App() {
   return (
@@ -18,6 +19,10 @@ export default function App() {
         <Route
           path="/audience/:campaign_code/:type"
           element={<AudiencePage />}
+        />
+        <Route
+          path="/audience-v1/:campaign_code/:type"
+          element={<AudienceV1Page />}
         />
         <Route path="/cage/control" element={<CageControlPage />} />
         <Route path="/cage/audience" element={<CageAudiencePage />} />
