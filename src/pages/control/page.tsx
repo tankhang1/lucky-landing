@@ -661,7 +661,7 @@ export default function ControlPage() {
                     )}
                   </div>
                 </TabsContent>
-                {program?.type === 0 ? (
+                {program?.type === 1 ? (
                   <TabsContent value="stage" className="mt-4">
                     <div className="grid xl:grid-cols-3 gap-5">
                       <Card className="xl:col-span-2">

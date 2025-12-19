@@ -51,6 +51,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+type SpinResult = {
+  round: number;
+  winningNumber: string; // Số trúng giải (VD: Mã dự thưởng)
+  winners: TLucky[]; // Danh sách người trúng của mã này (nếu 1 mã có nhiều người)
+};
 export default function AudienceDeluxeV1() {
   const { campaign_code, type } = useParams();
   const stompClientRef = useRef<any>(null);
@@ -66,11 +71,8 @@ export default function AudienceDeluxeV1() {
   const { data: winners } = useGetListLuckyHistory({
     c: campaign_code || "",
   });
-  const {
-    mutate: requestLuckyRandom,
-    isPending: isLoadingRequestRandom,
-    data: luckyRandom,
-  } = useRequestLuckyRandom();
+  const { mutate: requestLuckyRandom, isPending: isLoadingRequestRandom } =
+    useRequestLuckyRandom();
 
   const [currentLoopIndex, setCurrentLoopIndex] = useState(0);
   const [flash, setFlash] = useState(false);
@@ -80,9 +82,10 @@ export default function AudienceDeluxeV1() {
   const [loop, setLoop] = useState(0);
   const [displayNumber, setDisplayNumber] = useState("00000");
   const [isSpinning, setIsSpinning] = useState(false);
-  const [sessionWinners, setSessionWinners] = useState<TLucky[]>([]);
+  const [sessionResults, setSessionResults] = useState<SpinResult[]>([]);
   const [showResultModal, setShowResultModal] = useState(false);
   const [pendingWinner, setPendingWinner] = useState<TLucky | null>(null);
+  const [selectedNumberResult, setSelectedNumberResult] = useState("");
   const prevCount = useRef(listWinners?.length || 0);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -203,12 +206,13 @@ export default function AudienceDeluxeV1() {
       alert("Vui lòng chọn quà tặng và số lượt quay");
       return;
     }
-    // Reset cho phiên mới
-    setSessionWinners([]);
+    setSelectedNumberResult("");
+    setSessionResults([]);
     setCurrentLoopIndex(0);
     setPendingWinner(null);
     setDisplayNumber("00000");
-
+    // 3. Mở Modal kết quả
+    setShowResultModal(true);
     // Bắt đầu lượt đầu tiên
     executeSpinCode();
   };
@@ -223,8 +227,14 @@ export default function AudienceDeluxeV1() {
             const winner = data.data[0];
             setPendingWinner(winner);
 
-            // Cập nhật số để FiveDigitJackpot bắt đầu chạy hiệu ứng
-            // Lưu ý: FiveDigitJackpot cần detect prop 'number' thay đổi để chạy
+            setSessionResults((pre) => [
+              {
+                round: currentLoopIndex,
+                winners: data.data || [],
+                winningNumber: winner?.numb?.toString()?.padStart(5, "0"),
+              },
+              ...pre,
+            ]);
             setDisplayNumber(winner.numb.toString().padStart(5, "0"));
           } else {
             // Xử lý nếu không có ai trúng (API trả rỗng)
@@ -243,43 +253,35 @@ export default function AudienceDeluxeV1() {
     // Chỉ xử lý khi đang trong trạng thái quay thật (tránh trigger lúc init)
     if (!isSpinning || !pendingWinner) return;
 
-    // 1. Cập nhật danh sách người trúng
-    setSessionWinners((prev) => [pendingWinner, ...prev]);
-
     // 2. Bắn pháo hoa
-    confetti({
-      particleCount: 200,
-      spread: 100,
-      origin: { y: 0.6 },
-      zIndex: 9999,
-    });
-
-    // 3. Mở Modal kết quả
-    setShowResultModal(true);
+    setTimeout(() => {
+      confetti({
+        particleCount: 200,
+        spread: 100,
+        origin: { y: 0.6 },
+        zIndex: 9999,
+      });
+    }, 1000);
 
     // 4. Kết thúc trạng thái quay của lượt này
     setIsSpinning(false);
+    handleNextLoop();
   };
   const handleNextLoop = () => {
     // Đóng modal để nhìn thấy màn hình chính quay tiếp
-    setShowResultModal(false);
+
     setPendingWinner(null);
 
     if (currentLoopIndex + 1 < loop) {
-      // Tăng index và quay tiếp sau 1 khoảng nhỏ để modal kịp đóng
       setCurrentLoopIndex((prev) => prev + 1);
       setTimeout(() => {
         executeSpinCode();
       }, 500);
-    } else {
-      // Hết vòng lặp
-      handleFinishSession();
     }
   };
 
   const handleFinishSession = () => {
     setShowResultModal(false);
-
     queryClient.invalidateQueries({
       queryKey: [QUERY_KEY.CAMPAGIN.LIST_LUCKY_HISTORY],
     });
@@ -316,57 +318,59 @@ export default function AudienceDeluxeV1() {
             <div className="relative">
               <FiveDigitJackpot
                 number={displayNumber}
-                type={type || ""}
+                type={"0"}
                 onComplete={onJackpotAnimationComplete}
               />
             </div>
-            <div className="flex justify-center items-center gap-2">
-              <Select value={giftCode} onValueChange={setGiftCode}>
-                <SelectTrigger
-                  className={`${selectTriggerClass} w-auto max-w-[420px]`}
+            <div className="flex flex-col justify-center items-center gap-5">
+              <div className="flex justify-center items-center gap-2">
+                <Select value={giftCode} onValueChange={setGiftCode}>
+                  <SelectTrigger
+                    className={`${selectTriggerClass} w-auto max-w-[420px]`}
+                  >
+                    <div className="flex-1 min-w-0 flex justify-center items-center px-1 gap-2">
+                      <span className="truncate text-lg flex-1">
+                        <SelectValue placeholder="Chọn giải quay"></SelectValue>
+                      </span>
+                      <ChevronDown color="white" size={24} />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="overflow-auto max-h-[150px]">
+                    <SelectItem disabled key={"-1"} value={"-1"}>
+                      Chọn giải quay
+                    </SelectItem>
+                    {gifts?.map((p) => (
+                      <SelectItem key={p.gift_code} value={p.gift_code}>
+                        {p.award_name} - {p.gift_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={loop.toString()}
+                  onValueChange={(value) => setLoop(+value)}
                 >
-                  <div className="flex-1 min-w-0 flex justify-center items-center px-1 gap-2">
-                    <span className="truncate text-lg flex-1">
-                      <SelectValue placeholder="Chọn giải quay"></SelectValue>
-                    </span>
-                    <ChevronDown color="white" size={24} />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="overflow-auto max-h-[150px]">
-                  <SelectItem disabled key={"-1"} value={"-1"}>
-                    Chọn giải quay
-                  </SelectItem>
-                  {gifts?.map((p) => (
-                    <SelectItem key={p.gift_code} value={p.gift_code}>
-                      {p.award_name} - {p.gift_name}
+                  <SelectTrigger className={`${selectTriggerClass} w-auto`}>
+                    <div className="flex-1 min-w-0 flex justify-center items-center px-1 gap-2">
+                      <span className="truncate text-lg flex-1">
+                        <SelectValue placeholder="Chọn lượt quay" />
+                      </span>
+                      <ChevronDown color="white" size={24} />
+                    </div>
+                    <TriangleIcon />
+                  </SelectTrigger>
+                  <SelectContent className="overflow-auto max-h-[150px]">
+                    <SelectItem key={"0"} value={"0"} disabled>
+                      Chọn lượt quay
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={loop.toString()}
-                onValueChange={(value) => setLoop(+value)}
-              >
-                <SelectTrigger className={`${selectTriggerClass} w-auto`}>
-                  <div className="flex-1 min-w-0 flex justify-center items-center px-1 gap-2">
-                    <span className="truncate text-lg flex-1">
-                      <SelectValue placeholder="Chọn lượt quay" />
-                    </span>
-                    <ChevronDown color="white" size={24} />
-                  </div>
-                  <TriangleIcon />
-                </SelectTrigger>
-                <SelectContent className="overflow-auto max-h-[150px]">
-                  <SelectItem key={"0"} value={"0"} disabled>
-                    Chọn lượt quay
-                  </SelectItem>
-                  {Array.from({ length: 20 })?.map((_, i) => (
-                    <SelectItem key={i + 1} value={(i + 1).toString()}>
-                      {i + 1}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    {Array.from({ length: 20 })?.map((_, i) => (
+                      <SelectItem key={i + 1} value={(i + 1).toString()}>
+                        {i + 1}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button
                 disabled={isSpinning || isLoadingRequestRandom}
                 className="bg-[#ed6c36] hover:bg-[#d95e2b] text-white text-xl rounded-[2rem] px-10 py-3 h-auto min-w-[160px] font-normal shadow-md transition-all active:scale-95"
@@ -411,10 +415,10 @@ export default function AudienceDeluxeV1() {
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 bg-[#428C57]">
                     <tr className="text-lg text-white">
-                      {/* <th className="text-center p-3 w-12">STT</th> */}
+                      <th className="text-center p-3 w-12">STT</th>
                       <th className="text-center p-3">Số may mắn</th>
                       <th className="text-center p-3">Giải</th>
-                      <th className="text-center p-3">Quà tặng</th>
+                      {/* <th className="text-center p-3">Quà tặng</th> */}
                       <th className="text-center p-3">Tên</th>
                       <th className="text-center p-3">SĐT</th>
                     </tr>
@@ -426,12 +430,12 @@ export default function AudienceDeluxeV1() {
                         ref={idx === 0 ? firstRowRef : undefined}
                         className="border-t"
                       >
-                        {/* <td className="p-3 text-center">{idx + 1}</td>*/}
+                        <td className="p-3 text-center">{idx + 1}</td>
                         <td className="p-3 text-center">{w.number}</td>
                         <td className="p-3 font-medium text-center">
                           {w.award_name}
                         </td>
-                        <td className="p-3 text-center">{w.gift_name}</td>
+                        {/* <td className="p-3 text-center">{w.gift_name}</td> */}
                         <td className="p-3 text-center">
                           {w.consumer_name ?? "—"}
                         </td>
@@ -546,10 +550,10 @@ export default function AudienceDeluxeV1() {
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 bg-[#428C57]">
                     <tr className="text-lg text-white">
-                      {/* <th className="text-center p-3 w-12">STT</th> */}
+                      <th className="text-center p-3 w-12">STT</th>
                       <th className="text-center p-3">Số may mắn</th>
                       <th className="text-center p-3">Giải</th>
-                      <th className="text-center p-3">Quà tặng</th>
+                      {/* <th className="text-center p-3">Quà tặng</th> */}
                       <th className="text-center p-3">Tên</th>
                       <th className="text-center p-3">SĐT</th>
                     </tr>
@@ -561,12 +565,12 @@ export default function AudienceDeluxeV1() {
                         ref={idx === 0 ? firstRowRef : undefined}
                         className="border-t"
                       >
-                        {/* <td className="p-3 text-center">{idx + 1}</td>*/}
+                        <td className="p-3 text-center">{idx + 1}</td>
                         <td className="p-3 text-center">{w.number}</td>
                         <td className="p-3 font-medium text-center">
                           {w.award_name}
                         </td>
-                        <td className="p-3 text-center">{w.gift_name}</td>
+                        {/* <td className="p-3 text-center">{w.gift_name}</td> */}
                         <td className="p-3 text-center">
                           {w.consumer_name ?? "—"}
                         </td>
@@ -615,7 +619,7 @@ export default function AudienceDeluxeV1() {
           <div className="flex-1 overflow-y-auto bg-gray-50 flex flex-col">
             {/* PHẦN 1: CHÚC MỪNG SỐ VỪA TRÚNG (pendingWinner) */}
             <div className="bg-white p-8 border-b shadow-sm flex flex-col items-center justify-center shrink-0 z-10">
-              {pendingWinner ? (
+              {sessionResults?.length > 0 ? (
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -624,15 +628,41 @@ export default function AudienceDeluxeV1() {
                   <h2 className="text-2xl text-[#0F392B]">
                     Chúc mừng số may mắn
                   </h2>
-                  <div className="text-6xl md:text-7xl font-mono font-bold text-[#ed6c36] drop-shadow-md tracking-wider">
-                    {pendingWinner.numb.toString().padStart(5, "0")}
+                  <div className="flex flex-row flex-wrap items-center justify-center gap-4">
+                    {sessionResults?.map((item, index) => (
+                      <div
+                        key={index}
+                        className={cn(
+                          "transition-all delay-1000 cursor-pointer",
+                          isSpinning && index === 0
+                            ? "opacity-0 scale-95"
+                            : "opacity-100 scale-100"
+                        )}
+                        onClick={() =>
+                          setSelectedNumberResult(item.winningNumber)
+                        }
+                      >
+                        <div
+                          className={cn(
+                            // Giảm size chữ xuống 3xl/4xl để vừa Grid
+                            "text-5xl font-mono font-bold text-[#ed6c36] drop-shadow-sm tracking-wider",
+                            isSpinning &&
+                              index === 0 &&
+                              "opacity-0 transition-all duration-150"
+                          )}
+                        >
+                          {item.winningNumber.padStart(5, "0")}
+                        </div>
+                      </div>
+                    ))}
                   </div>
+
                   <div className="flex flex-col items-center gap-1">
                     <span className="font-bold text-xl text-[#0F392B]">
-                      {pendingWinner.award_name}
+                      {sessionResults?.[0]?.winners?.[0]?.award_name || ""}
                     </span>
                     <span className="text-gray-500">
-                      {pendingWinner.gift_name}
+                      {sessionResults?.[0]?.winners?.[0]?.gift_name || ""}
                     </span>
                   </div>
                 </motion.div>
@@ -646,70 +676,67 @@ export default function AudienceDeluxeV1() {
             {/* PHẦN 2: DANH SÁCH TÍCH LŨY (sessionWinners) */}
             <div className="flex-1 p-4 md:p-6 bg-gray-50/50">
               <div className="flex items-center gap-2 mb-4 text-[#2e6b47] font-bold text-lg uppercase border-b pb-2">
-                <Trophy size={20} /> Danh sách trúng thưởng phiên này (
-                {sessionWinners.length})
+                <Trophy size={20} /> Danh sách trúng thưởng phiên này
               </div>
 
               <div className="space-y-3">
-                {sessionWinners.map((winner, idx) => (
-                  <motion.div
-                    key={`${winner.numb}-${idx}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex items-center gap-4 p-3 rounded-xl border shadow-sm ${
-                      idx === 0
-                        ? "bg-orange-50 border-orange-200 ring-1 ring-orange-100"
-                        : "bg-white border-gray-200"
-                    }`}
-                  >
-                    <div className="flex-1 items-center flex gap-4">
-                      <div className="font-mono text-xl font-bold text-[#ed6c36]">
-                        {winner.numb.toString().padStart(5, "0")}
-                      </div>
-                      <div className="truncate flex flex-col flex-1  text-left">
-                        <div className="font-semibold text-sm text-gray-900">
-                          {winner.award_name}
+                {sessionResults
+                  ?.flatMap((item) => item.winners)
+                  .filter(
+                    (item) =>
+                      item.numb.toString().padStart(5, "0") ==
+                      selectedNumberResult
+                  )
+                  .map((winner, idx) => (
+                    <motion.div
+                      key={`${winner}-${idx}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex items-center gap-4 p-3 rounded-xl border shadow-sm ${
+                        idx === 0
+                          ? "bg-orange-50 border-orange-200 ring-1 ring-orange-100"
+                          : "bg-white border-gray-200"
+                      }`}
+                    >
+                      <div className="flex-1 items-center flex gap-4">
+                        <div className="font-mono text-xl font-bold text-[#ed6c36]">
+                          {winner.numb.toString().padStart(5, "0")}
                         </div>
-                        <div className="text-xs text-gray-500 truncate">
-                          {winner.gift_name}
+                        <div className="truncate flex flex-col flex-1  text-left">
+                          <div className="font-semibold text-sm text-gray-900">
+                            {winner.award_name}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {winner.gift_name}
+                          </div>
                         </div>
-                      </div>
-                      <div className="justify-center items-center flex flex-col">
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <User size={14} className="text-gray-400" />
+                        <div className="justify-center items-center flex flex-col">
+                          <div className="flex items-center gap-2 text-sm text-gray-700">
+                            <User size={14} className="text-gray-400" />
+                            <span className="font-medium truncate">
+                              {winner.consumer_name || "—"}
+                            </span>
+                          </div>
                           <span className="font-medium truncate">
-                            {winner.consumer_name || "—"}
+                            {winner.consumer_phone || "—"}
                           </span>
                         </div>
-                        <span className="font-medium truncate">
-                          {winner.consumer_phone || "—"}
-                        </span>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  ))}
               </div>
             </div>
           </div>
 
           {/* Footer Control */}
           <div className="p-4 bg-white border-t flex justify-center shrink-0 gap-4">
-            {currentLoopIndex + 1 < loop ? (
-              <Button
-                onClick={handleNextLoop}
-                className="bg-[#2e6b47] hover:bg-[#1f4d32] text-white text-xl h-14 px-10 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-2"
-              >
-                Tiếp tục quay ({currentLoopIndex + 1}/{loop}){" "}
-                <RotateCw className="ml-1" />
-              </Button>
-            ) : (
-              <Button
-                onClick={handleFinishSession}
-                className="bg-[#ed6c36] hover:bg-[#d95e2b] text-white text-xl h-14 px-10 rounded-full shadow-lg flex items-center gap-2"
-              >
-                Hoàn tất <CheckCircle2 className="ml-1" />
-              </Button>
-            )}
+            <Button
+              onClick={handleFinishSession}
+              className="bg-[#ed6c36] hover:bg-[#d95e2b] text-white text-xl h-14 px-10 rounded-full shadow-lg flex items-center gap-2"
+              disabled={currentLoopIndex + 1 < loop}
+            >
+              Hoàn tất <CheckCircle2 className="ml-1" />
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
