@@ -97,7 +97,7 @@ export default function DigitReel({
         {list.map((d, i) => (
           <div
             key={`${d}-${i}`}
-            className="flex items-center justify-center font-mono font-extrabold text-[#0F392B]"
+            className="flex items-center justify-center font-extrabold text-[#0F392B]"
             style={{ height: h, fontSize: `${160 * 0.7}px` }}
           >
             {d}

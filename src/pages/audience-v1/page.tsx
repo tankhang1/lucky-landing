@@ -5,11 +5,12 @@ import confetti from "canvas-confetti";
 import {
   CheckCircle2,
   ChevronDown,
+  CircleAlert,
+  InfoIcon,
   Loader2,
   Maximize2,
   Minimize2,
   Play,
-  RotateCw,
   TriangleIcon,
   Trophy,
   User,
@@ -86,6 +87,8 @@ export default function AudienceDeluxeV1() {
   const [showResultModal, setShowResultModal] = useState(false);
   const [pendingWinner, setPendingWinner] = useState<TLucky | null>(null);
   const [selectedNumberResult, setSelectedNumberResult] = useState("");
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
   const prevCount = useRef(listWinners?.length || 0);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -94,7 +97,7 @@ export default function AudienceDeluxeV1() {
 
   const [isFull, setIsFull] = useState(false);
   const toggleFullScreen = async () => {
-    const el = containerRef.current;
+    const el = document.documentElement;
     if (!el) return;
 
     if (!document.fullscreenElement) {
@@ -203,7 +206,7 @@ export default function AudienceDeluxeV1() {
 
   const onStartSpinning = () => {
     if (giftCode === "-1" || loop === 0) {
-      alert("Vui lòng chọn quà tặng và số lượt quay");
+      setAlertMessage("Vui lòng chọn quà tặng và số lượt quay");
       return;
     }
     setSelectedNumberResult("");
@@ -239,12 +242,13 @@ export default function AudienceDeluxeV1() {
           } else {
             // Xử lý nếu không có ai trúng (API trả rỗng)
             setIsSpinning(false);
-            alert("Không tìm thấy người trúng thưởng!");
+            setShowResultModal(false);
+            setEmptyMessage("Không tìm thấy người trúng thưởng!");
           }
         },
         onError: () => {
           setIsSpinning(false);
-          alert("Lỗi hệ thống, vui lòng thử lại");
+          setAlertMessage("Lỗi hệ thống, vui lòng thử lại");
         },
       }
     );
@@ -736,6 +740,60 @@ export default function AudienceDeluxeV1() {
               disabled={currentLoopIndex + 1 < loop}
             >
               Hoàn tất <CheckCircle2 className="ml-1" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={!!alertMessage}
+        onOpenChange={(open) => !open && setAlertMessage(null)}
+      >
+        <DialogContent className="z-[100000] max-w-sm bg-white p-6 rounded-xl">
+          <div className="flex flex-col items-center gap-4 text-center">
+            {/* Icon */}
+            <div className="h-24 w-24 bg-red-100 rounded-full flex items-center justify-center">
+              <CircleAlert color="red" size={48} />
+            </div>
+
+            {/* Message */}
+            <div className="space-y-2">
+              <h3 className="font-bold text-2xl text-neutral-900">Thông báo</h3>
+              <p className="text-neutral-600 text-2xl">{alertMessage}</p>
+            </div>
+
+            {/* Close Button */}
+            <Button
+              onClick={() => setAlertMessage(null)}
+              className="w-full text-xl py-2 bg-[#2e6b47] hover:bg-[#255739]"
+            >
+              Đã hiểu
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={!!emptyMessage}
+        onOpenChange={(open) => !open && setEmptyMessage(null)}
+      >
+        <DialogContent className="z-[100000] max-w-sm bg-white p-6 rounded-xl">
+          <div className="flex flex-col items-center gap-4 text-center">
+            {/* Icon */}
+            <div className="h-24 w-24 bg-green-100 rounded-full flex items-center justify-center">
+              <InfoIcon color="green" size={48} />
+            </div>
+
+            {/* Message */}
+            <div className="space-y-2">
+              <h3 className="font-bold text-2xl text-neutral-900">Thông báo</h3>
+              <p className="text-neutral-600 text-2xl">{emptyMessage}</p>
+            </div>
+
+            {/* Close Button */}
+            <Button
+              onClick={() => setEmptyMessage(null)}
+              className="w-full text-xl py-2 bg-[#2e6b47] hover:bg-[#255739]"
+            >
+              Đã hiểu
             </Button>
           </div>
         </DialogContent>
