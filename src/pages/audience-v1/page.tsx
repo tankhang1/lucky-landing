@@ -550,7 +550,7 @@ export default function AudienceDeluxeV1() {
             <WinnersTicker items={listWinners} dot={THEMES[1].dot} />
 
             <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
-              <div ref={tableWrapRef} className="max-h-[50vh] overflow-auto">
+              <div ref={tableWrapRef} className="max-h-[53vh] overflow-auto">
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 bg-[#428C57]">
                     <tr className="text-lg text-white">
