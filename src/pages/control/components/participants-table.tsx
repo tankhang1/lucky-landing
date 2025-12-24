@@ -53,7 +53,7 @@ export function ParticipantsTable({
                 <th className="text-left p-3">Họ tên</th>
                 <th className="text-left p-3">SĐT</th>
                 <th className="text-left p-3">Đã chọn số</th>
-                <th className="text-left p-3">Số lượt còn lại</th>
+                <th className="text-left p-3">Số lượt tham gia</th>
                 <th className="text-left p-3">Chi tiết</th>
               </tr>
             </thead>
