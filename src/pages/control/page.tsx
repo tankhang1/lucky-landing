@@ -313,6 +313,7 @@ export default function ControlPage() {
       setPrize(prizes);
     }
   }, [prizes]);
+  console.log(program);
   return (
     <Shell>
       <main className="container mx-auto px-4 py-6 space-y-6">
@@ -661,7 +662,7 @@ export default function ControlPage() {
                     )}
                   </div>
                 </TabsContent>
-                {program?.type === 1 ? (
+                {program?.type === 0 ? (
                   <TabsContent value="stage" className="mt-4">
                     <div className="grid xl:grid-cols-3 gap-5">
                       <Card className="xl:col-span-2">
