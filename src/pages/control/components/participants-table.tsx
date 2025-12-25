@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button";
 
 import { Input } from "@/components/ui/input";
 import type { Participant } from "@/lib/store";
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import CustomerLuckyModal from "./customer-lucky-modal";
-
+import { useGetCustomerDetail } from "@/react-query/queries/campaign/campaign";
+import * as XLSX from "xlsx";
 export function ParticipantsTable({
   participants,
   code,
@@ -13,6 +14,8 @@ export function ParticipantsTable({
   participants: Participant[];
   code: string;
 }) {
+  const { mutate: getCustomerDetail, isPending: isExporting } =
+    useGetCustomerDetail();
   const [selectedCustomer, setSelectedCustomer] = useState<Participant | null>(
     null
   );
@@ -27,7 +30,47 @@ export function ParticipantsTable({
       return matchName || matchPhone;
     });
   }, [query, participants]);
+  const onExportCustomerDetail = () => {
+    getCustomerDetail(
+      {
+        c: code,
+      },
+      {
+        onSuccess: (data) => {
+          const excelData = data.map((item) => ({
+            "Tên chương trình": item.campaign_name,
+            "Mã KH": item.consumer_code,
+            "Tên KH": item.consumer_name,
+            "DT KH": item.consumer_phone,
+            "Số may mắn": item.numb,
+            Giải: item.award_name,
+            "Quà tặng": item.gift_name,
+          }));
 
+          const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+          const columnWidths = [
+            { wch: 40 },
+            { wch: 15 },
+            { wch: 25 },
+            { wch: 15 },
+            { wch: 15 },
+            { wch: 20 },
+          ];
+          worksheet["!cols"] = columnWidths;
+
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            "Danh sách tham gia"
+          );
+
+          XLSX.writeFile(workbook, "Danh_sach_khach_hang.xlsx");
+        },
+      }
+    );
+  };
   return (
     <>
       {/* Search bar */}
@@ -42,8 +85,12 @@ export function ParticipantsTable({
           <div className="text-sm text-muted-foreground">
             Tổng: {filtered.length}
           </div>
-          <Button>
-            <Download />
+          <Button disabled={isExporting} onClick={onExportCustomerDetail}>
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
             Xuất file
           </Button>
         </div>

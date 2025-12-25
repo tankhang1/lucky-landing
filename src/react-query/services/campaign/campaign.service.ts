@@ -209,3 +209,14 @@ export const requestPublishEvent = async (
   });
   return data;
 };
+
+export type TGetCustomerDetailReq = {
+  c: string;
+};
+export type TGetCustomerDetailRes = TLucky[];
+export const getCustomerDetails = async (params: TGetCustomerDetailReq) => {
+  const { data } = await api.get(PATH.CAMPAIGN.GET_CUSTOMER_DETAIL, {
+    params,
+  });
+  return data;
+};

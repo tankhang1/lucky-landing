@@ -1,6 +1,7 @@
 import QUERY_KEY from "@/constants/key";
 import {
   getCampaignDetailNumber,
+  getCustomerDetails,
   getListCampaign,
   getListCampaignLuckyHistory,
   getListCustomerCampaign,
@@ -10,6 +11,8 @@ import {
   requestPublishEvent,
   type TGetCampaignDetailNumberReq,
   type TGetCampaignDetailNumberRes,
+  type TGetCustomerDetailReq,
+  type TGetCustomerDetailRes,
   type TGetListCampaignLuckyHistoryReq,
   type TGetListCampaignLuckyHistoryRes,
   type TGetListCampaignRes,
@@ -108,5 +111,15 @@ export const useGetListLuckyHistory = (
 export const useRequestPublishEvent = () => {
   return useMutation<void, AxiosError<null>, TPublishEventReq>({
     mutationFn: requestPublishEvent,
+  });
+};
+
+export const useGetCustomerDetail = () => {
+  return useMutation<
+    TGetCustomerDetailRes,
+    AxiosError<null>,
+    TGetCustomerDetailReq
+  >({
+    mutationFn: getCustomerDetails,
   });
 };

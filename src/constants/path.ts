@@ -12,6 +12,7 @@ const PATH = {
     REQUEST_LUCKY_MANUAL: "/program/congrat-manual",
     REQUEST_LUCKY_RANDOM: "/program/congrat-random",
     PUBLISH_EVENT: "/collect/data-socket",
+    GET_CUSTOMER_DETAIL: "/collect/campaign/number-get",
   },
 };
 export default PATH;
