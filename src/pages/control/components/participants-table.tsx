@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 
 import { Input } from "@/components/ui/input";
 import type { Participant } from "@/lib/store";
-import { Eye } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import { useMemo, useState } from "react";
 import CustomerLuckyModal from "./customer-lucky-modal";
 
@@ -38,8 +38,14 @@ export function ParticipantsTable({
           onChange={(e) => setQuery(e.target.value)}
           className="max-w-sm"
         />
-        <div className="text-sm text-muted-foreground">
-          Tổng: {filtered.length}
+        <div className="flex items-end gap-2">
+          <div className="text-sm text-muted-foreground">
+            Tổng: {filtered.length}
+          </div>
+          <Button>
+            <Download />
+            Xuất file
+          </Button>
         </div>
       </div>
 

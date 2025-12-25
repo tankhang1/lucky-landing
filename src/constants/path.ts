@@ -1,6 +1,7 @@
 const PATH = {
   AUTH: {
     SIGNIN: "/login",
+    CHECK_TOKEN: "/check-token-expired",
   },
   CAMPAIGN: {
     GET_LIST: "/zalo/campaign/search",

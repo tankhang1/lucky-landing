@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCheckTokenExpire } from "@/react-query/queries/auth/auth";
 function CagePreview({
   value,
   count = 5,
@@ -146,6 +147,8 @@ export default function ControlPage() {
   });
   const { mutate: requestLucky, isPending: isLoadingRequest } =
     useRequestLuckyManual();
+  const { mutate: checkToken } = useCheckTokenExpire();
+
   const {
     mutate: requestLuckyRandom,
     isPending: isLoadingRequestRandom,
@@ -313,6 +316,29 @@ export default function ControlPage() {
       setPrize(prizes);
     }
   }, [prizes]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      checkToken(
+        {
+          token: token,
+        },
+        {
+          onSuccess: (isExpire) => {
+            if (isExpire) {
+              localStorage.clear();
+              location.replace("/");
+              alert("Đã hết phiên đăng nhập, vui lòng đăng nhập lại");
+            }
+          },
+        }
+      );
+    } else {
+      localStorage.clear();
+      location.replace("/");
+      alert("Đã hết phiên đăng nhập, vui lòng đăng nhập lại");
+    }
+  }, [location.pathname]);
   console.log(program);
   return (
     <Shell>

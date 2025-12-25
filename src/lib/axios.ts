@@ -18,8 +18,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Logic to redirect to login
+    if (error.response?.status === 403) {
+      localStorage.clear();
+      location.replace("/");
+      alert("Đã hết phiên đăng nhập, vui lòng đăng nhập lại");
     }
     return Promise.reject(error);
   }

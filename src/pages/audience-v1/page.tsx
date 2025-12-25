@@ -52,6 +52,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useCheckTokenExpire } from "@/react-query/queries/auth/auth";
 type SpinResult = {
   round: number;
   winningNumber: string; // Số trúng giải (VD: Mã dự thưởng)
@@ -74,6 +75,7 @@ export default function AudienceDeluxeV1() {
   });
   const { mutate: requestLuckyRandom, isPending: isLoadingRequestRandom } =
     useRequestLuckyRandom();
+  const { mutate: checkToken } = useCheckTokenExpire();
 
   const [currentLoopIndex, setCurrentLoopIndex] = useState(0);
   const [flash, setFlash] = useState(false);
@@ -293,6 +295,29 @@ export default function AudienceDeluxeV1() {
   const selectTriggerClass =
     "h-[45px]! bg-[#2e6b47] hover:bg-[#255739] text-white rounded-full border-none ring-0 focus:ring-0 shadow-sm px-5 flex items-center justify-between [&>svg]:hidden";
   console.log("receive", receivedEvent, receivedEvent, isConnectingSocket);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      checkToken(
+        {
+          token: token,
+        },
+        {
+          onSuccess: (isExpire) => {
+            if (isExpire) {
+              localStorage.clear();
+              location.replace("/");
+              alert("Đã hết phiên đăng nhập, vui lòng đăng nhập lại");
+            }
+          },
+        }
+      );
+    } else {
+      localStorage.clear();
+      location.replace("/");
+      alert("Đã hết phiên đăng nhập, vui lòng đăng nhập lại");
+    }
+  }, [location.pathname]);
   return (
     <div
       ref={containerRef}
