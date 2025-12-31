@@ -801,7 +801,8 @@ export default function ControlPage() {
                                       key={`${p.gift_code}_${p.award_name}`}
                                       value={`${p.gift_code}_${p.award_name}`}
                                     >
-                                      {p.gift_name} (SL: {p.counter}/{p.limits})
+                                      {p.award_name} - {p.gift_name} (SL:{" "}
+                                      {p.counter}/{p.limits})
                                     </SelectItem>
                                   ))}
                                 </SelectContent>

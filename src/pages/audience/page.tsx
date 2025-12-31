@@ -31,6 +31,7 @@ import CrownIcon from "@/assets/crown.png";
 import Logo from "@/assets/audience-logo.png";
 import queryClient from "@/react-query";
 import QUERY_KEY from "@/constants/key";
+import dayjs from "dayjs";
 export default function AudienceDeluxe() {
   const { campaign_code, type } = useParams();
   const stompClientRef = useRef<any>(null);
@@ -310,7 +311,11 @@ export default function AudienceDeluxe() {
                     </div>
                     <div className="text-neutral-500">Thời gian</div>
                     <div>
-                      {new Date(listWinners?.[0]?.time).toLocaleString()}
+                      {listWinners?.[0]?.time
+                        ? dayjs(new Date(listWinners[0].time)).format(
+                            "DD/MM/YYYY"
+                          )
+                        : ""}
                     </div>
                   </div>
                 </div>

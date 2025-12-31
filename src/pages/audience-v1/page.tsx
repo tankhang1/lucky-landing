@@ -53,6 +53,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCheckTokenExpire } from "@/react-query/queries/auth/auth";
+import dayjs from "dayjs";
 type SpinResult = {
   round: number;
   winningNumber: string; // Số trúng giải (VD: Mã dự thưởng)
@@ -561,7 +562,11 @@ export default function AudienceDeluxeV1() {
                     </div>
                     <div className="text-neutral-500">Thời gian</div>
                     <div>
-                      {new Date(listWinners?.[0]?.time).toLocaleString()}
+                      {listWinners?.[0]?.time
+                        ? dayjs(new Date(listWinners[0].time)).format(
+                            "DD/MM/YYYY"
+                          )
+                        : ""}
                     </div>
                   </div>
                 </div>
