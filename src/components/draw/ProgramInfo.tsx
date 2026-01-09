@@ -20,14 +20,13 @@ export default function ProgramInfo({
             <img
               src={program.image_banner}
               alt={program.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           ) : (
             <div className="h-full w-full bg-muted" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
         </div>
-        <div className="p-6">
+        <div className="p-6 max-h-[300px] overflow-y-auto">
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <Badge
               variant={
