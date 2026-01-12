@@ -338,10 +338,10 @@ export default function AudienceDeluxeV1() {
       </div>
       {type == "1" ? (
         <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
-          <img src={Logo} className="w-96 absolute top-0" />
+          <img src={Logo} className="xl:w-96 w-72 absolute top-0" />
 
           <div className="w-full lg:w-[55%] flex flex-col items-center justify-center gap-0 ">
-            <div className="flex items-center text-3xl lg:text-5xl font-extrabold text-[#0F392B] tracking-widest uppercase">
+            <div className="flex items-center text-3xl lg:text-4xl xl:text-5xl font-extrabold text-[#0F392B] tracking-widest uppercase">
               QUAY SỐ MAY MẮN
             </div>
 
@@ -424,7 +424,7 @@ export default function AudienceDeluxeV1() {
               <div className="relative">
                 <img src={CrownIcon} className="w-14" />
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-[#0F392B]">
+              <div className="text-2xl xl:text-3xl font-bold text-[#0F392B]">
                 Người trúng giải gần nhất
               </div>
               <button
@@ -442,7 +442,7 @@ export default function AudienceDeluxeV1() {
 
             <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
               <div ref={tableWrapRef} className="max-h-[68vh] overflow-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs xl:text-sm">
                   <thead className="sticky top-0 bg-[#428C57]">
                     <tr className="text-lg text-white">
                       <th className="text-center p-3 w-12">STT</th>
@@ -453,7 +453,7 @@ export default function AudienceDeluxeV1() {
                       <th className="text-center p-3">SĐT</th>
                     </tr>
                   </thead>
-                  <tbody className="text-lg">
+                  <tbody className="text-sm xl:text-lg">
                     {listWinners?.map((w, idx) => (
                       <tr
                         key={idx}
@@ -490,14 +490,14 @@ export default function AudienceDeluxeV1() {
         </div>
       ) : (
         <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-center ">
-          <img src={Logo} className="w-96 absolute top-0" />
+          <img src={Logo} className="xl:w-96 w-72 absolute top-0" />
 
           <div className="w-full lg:w-[50%] flex flex-col items-center justify-center gap-0 ">
             <div className="flex items-center gap-3 w-full">
               <div className="relative">
                 <img src={CrownIcon} className="w-14" />
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-[#0F392B]">
+              <div className="text-2xl xl:text-3xl font-bold text-[#0F392B]">
                 Người trúng giải gần nhất
               </div>
               <button
@@ -534,20 +534,20 @@ export default function AudienceDeluxeV1() {
             >
               <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/40" />
               {listWinners?.[0] ? (
-                <div className="grid grid-cols-[300px_1fr] gap-4 items-center">
+                <div className="grid xl:grid-cols-[300px_1fr] grid-cols-[150px_1fr] gap-4 items-center">
                   <div>
                     {listWinners?.[0]?.gift_image ? (
                       <img
                         src={`${
                           listWinners?.[0]?.gift_image
                         }?t=${new Date().getTime()}`}
-                        className="w-64 object-contain"
+                        className="xl:w-64 w-auto h-auto object-contain"
                       />
                     ) : (
                       <div className="h-44 w-44 rounded-xl bg-neutral-100" />
                     )}
                   </div>
-                  <div className="grid grid-cols-[100px_1fr] gap-3 text-sm md:text-base">
+                  <div className="grid xl:grid-cols-[100px_1fr] grid-cols-2 gap-3 text-sm md:text-base">
                     <div className="text-neutral-500">Giải</div>
                     <div className="font-semibold">
                       {listWinners?.[0]?.award_name}
@@ -581,7 +581,7 @@ export default function AudienceDeluxeV1() {
 
             <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
               <div ref={tableWrapRef} className="max-h-[53vh] overflow-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs xl:text-sm">
                   <thead className="sticky top-0 bg-[#428C57]">
                     <tr className="text-lg text-white">
                       <th className="text-center p-3 w-12">STT</th>
@@ -592,7 +592,7 @@ export default function AudienceDeluxeV1() {
                       <th className="text-center p-3">SĐT</th>
                     </tr>
                   </thead>
-                  <tbody className="text-lg">
+                  <tbody className="text-sm xl:text-lg">
                     {listWinners?.map((w, idx) => (
                       <tr
                         key={idx}
