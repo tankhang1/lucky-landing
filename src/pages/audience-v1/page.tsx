@@ -345,7 +345,11 @@ export default function AudienceDeluxeV1() {
         <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
           <img src={Logo} className="xl:w-96 w-72 absolute top-0" />
 
-          <div className="w-[50%] lg:w-[55%] flex flex-col items-center justify-center gap-0 z-[1000]">
+          <div
+            className={`w-[50%] lg:w-[55%] flex flex-col items-center justify-center gap-0 ${
+              showResultModal && "z-[1000]"
+            }`}
+          >
             <div className="flex items-center text-3xl lg:text-4xl xl:text-5xl font-extrabold text-[#0F392B] tracking-widest uppercase">
               QUAY SỐ MAY MẮN
             </div>
