@@ -165,7 +165,7 @@ export default function FiveDigitJackpot({
         style={{ backgroundImage: `url(${LuckyNumberBg})` }}
       />
       {/* --- REELS --- */}
-      <div className="relative overflow-hidden p-6">
+      <div className="relative overflow-hidden p-6 xl:px-9">
         <div className="relative flex flex-col items-center gap-6">
           <div className="flex justify-center gap-1 pt-2 pb-6 flex-nowrap">
             {active.map((isActive, i) => (

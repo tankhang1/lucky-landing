@@ -90,15 +90,15 @@ export default function DigitReel({
   return (
     <div
       onClick={onClick}
-      className="relative overflow-hidden rounded-sm cursor-pointer xl:w-[140px] w-[90px]"
-      style={{ height: 140 }}
+      className="relative overflow-hidden rounded-sm cursor-pointer xl:w-[140px] xl:h-[140px] w-[90px] h-[120px]"
     >
       <motion.div style={{ y, willChange: "transform" }}>
         {list.map((d, i) => (
           <div
             key={`${d}-${i}`}
-            className="flex items-center justify-center font-extrabold text-[#0F392B]"
-            style={{ height: h, fontSize: `${160 * 0.7}px` }}
+            className={`flex items-center justify-center font-extrabold text-[#0F392B] xl:h-[160px] xl:text-[112px]
+            h-[145px] text-[110px]
+            `}
           >
             {d}
           </div>

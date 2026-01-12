@@ -340,12 +340,12 @@ export default function AudienceDeluxeV1() {
         <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
           <img src={Logo} className="xl:w-96 w-72 absolute top-0" />
 
-          <div className="w-full lg:w-[55%] flex flex-col items-center justify-center gap-0 ">
+          <div className="w-[50%] lg:w-[55%] flex flex-col items-center justify-center gap-0 ">
             <div className="flex items-center text-3xl lg:text-4xl xl:text-5xl font-extrabold text-[#0F392B] tracking-widest uppercase">
               QUAY SỐ MAY MẮN
             </div>
 
-            <div className="relative">
+            <div className="relative scale-75 lg:scale-100">
               <FiveDigitJackpot
                 number={displayNumber}
                 type={"0"}
@@ -359,7 +359,7 @@ export default function AudienceDeluxeV1() {
                     className={`${selectTriggerClass} w-auto max-w-[420px]`}
                   >
                     <div className="flex-1 min-w-0 flex justify-center items-center px-1 gap-2">
-                      <span className="truncate text-lg flex-1">
+                      <span className="truncate text-base lg:text-lg flex-1">
                         <SelectValue placeholder="Chọn giải quay"></SelectValue>
                       </span>
                       <ChevronDown color="white" size={24} />
@@ -382,7 +382,7 @@ export default function AudienceDeluxeV1() {
                 >
                   <SelectTrigger className={`${selectTriggerClass} w-auto`}>
                     <div className="flex-1 min-w-0 flex justify-center items-center px-1 gap-2">
-                      <span className="truncate text-lg flex-1">
+                      <span className="truncate text-base lg:text-lg flex-1">
                         <SelectValue placeholder="Chọn lượt quay" />
                       </span>
                       <ChevronDown color="white" size={24} />
@@ -419,7 +419,7 @@ export default function AudienceDeluxeV1() {
           </div> */}
           </div>
 
-          <div className="w-full lg:w-[45%] flex flex-col gap-3">
+          <div className="w-[45%] flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img src={CrownIcon} className="w-14" />
