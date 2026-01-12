@@ -34,6 +34,7 @@ import type {
   TRequestLuckyRandomRes,
 } from "@/react-query/services/campaign/campaign.service";
 import AudienceBg from "@/assets/audience-theme.png";
+import AudienceTabletBg from "@/assets/audience-tablet-theme.jpg";
 import CrownIcon from "@/assets/crown.png";
 import Logo from "@/assets/audience-logo.png";
 import queryClient from "@/react-query";
@@ -325,7 +326,11 @@ export default function AudienceDeluxeV1() {
       className="relative h-screen w-screen overflow-hidden"
     >
       <div
-        className="absolute inset-0 bg-no-repeat bg-[length:100%_100%]"
+        className="absolute inset-0 bg-no-repeat bg-[length:100%_100%] block lg:hidden"
+        style={{ backgroundImage: `url(${AudienceTabletBg})` }}
+      />
+      <div
+        className="absolute inset-0 bg-no-repeat bg-[length:100%_100%] hidden lg:block"
         style={{ backgroundImage: `url(${AudienceBg})` }}
       />
       <div className="absolute top-2 right-16 z-50 p-2">
@@ -340,7 +345,7 @@ export default function AudienceDeluxeV1() {
         <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
           <img src={Logo} className="xl:w-96 w-72 absolute top-0" />
 
-          <div className="w-[50%] lg:w-[55%] flex flex-col items-center justify-center gap-0 ">
+          <div className="w-[50%] lg:w-[55%] flex flex-col items-center justify-center gap-0 z-[1000]">
             <div className="flex items-center text-3xl lg:text-4xl xl:text-5xl font-extrabold text-[#0F392B] tracking-widest uppercase">
               QUAY SỐ MAY MẮN
             </div>
@@ -636,7 +641,16 @@ export default function AudienceDeluxeV1() {
           if (!open) handleFinishSession();
         }}
       >
-        <DialogContent className="max-w-4xl bg-white p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh] shadow-2xl border-2 border-[#2e6b47]">
+        <DialogContent
+          className={cn(
+            // mobile: centered, wide
+            "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-[92vw]",
+            // md+: center-right, width < 50%
+            "md:left-auto md:right-6 md:translate-x-0 md:w-[43vw] md:max-w-[48vw]",
+            // keep your styles
+            "bg-white p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh] shadow-2xl border-2 border-[#2e6b47]"
+          )}
+        >
           {/* Header Modal */}
           <DialogHeader className="bg-[#2e6b47] p-5 text-white shrink-0 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-20">
