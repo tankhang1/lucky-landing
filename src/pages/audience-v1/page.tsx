@@ -65,7 +65,7 @@ export default function AudienceDeluxeV1() {
   const stompClientRef = useRef<any>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [receivedEvent, setReceivedEvent] = useState<TReceiveEvent | null>(
-    null
+    null,
   );
   const [isConnectingSocket, setIsConnectingSocket] = useState(false);
 
@@ -188,7 +188,7 @@ export default function AudienceDeluxeV1() {
             console.log("Attempting to reconnect...");
             connect();
           }, 5000);
-        }
+        },
       );
     };
 
@@ -246,7 +246,7 @@ export default function AudienceDeluxeV1() {
           } else {
             // Xử lý nếu không có ai trúng (API trả rỗng)
             setIsSpinning(false);
-            setShowResultModal(false);
+            // setShowResultModal(false);
             setEmptyMessage("Không tìm thấy người trúng thưởng!");
           }
         },
@@ -254,7 +254,7 @@ export default function AudienceDeluxeV1() {
           setIsSpinning(false);
           setAlertMessage("Lỗi hệ thống, vui lòng thử lại");
         },
-      }
+      },
     );
   };
   const onJackpotAnimationComplete = () => {
@@ -312,7 +312,7 @@ export default function AudienceDeluxeV1() {
               alert("Đã hết phiên đăng nhập, vui lòng đăng nhập lại");
             }
           },
-        }
+        },
       );
     } else {
       localStorage.clear();
@@ -538,7 +538,7 @@ export default function AudienceDeluxeV1() {
               transition={{ type: "spring", stiffness: 240, damping: 18 }}
               className={cn(
                 "w-full relative rounded-2xl border bg-white/70 backdrop-blur p-6",
-                "shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)]"
+                "shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)]",
               )}
             >
               <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/40" />
@@ -573,7 +573,7 @@ export default function AudienceDeluxeV1() {
                     <div>
                       {listWinners?.[0]?.time
                         ? dayjs(new Date(listWinners[0].time)).format(
-                            "DD/MM/YYYY"
+                            "DD/MM/YYYY",
                           )
                         : ""}
                     </div>
@@ -652,7 +652,7 @@ export default function AudienceDeluxeV1() {
             // md+: center-right, width < 50%
             "md:left-auto md:right-6 md:translate-x-0 md:w-[43vw] md:max-w-[48vw]",
             // keep your styles
-            "bg-white p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh] shadow-2xl border-2 border-[#2e6b47]"
+            "bg-white p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh] shadow-2xl border-2 border-[#2e6b47]",
           )}
         >
           {/* Header Modal */}
@@ -688,7 +688,7 @@ export default function AudienceDeluxeV1() {
                           "transition-all delay-1000 cursor-pointer",
                           isSpinning && index === 0
                             ? "opacity-0 scale-95"
-                            : "opacity-100 scale-100"
+                            : "opacity-100 scale-100",
                         )}
                         onClick={() =>
                           setSelectedNumberResult(item.winningNumber)
@@ -700,7 +700,7 @@ export default function AudienceDeluxeV1() {
                             "text-5xl font-mono font-bold text-[#ed6c36] drop-shadow-sm tracking-wider",
                             isSpinning &&
                               index === 0 &&
-                              "opacity-0 transition-all duration-150"
+                              "opacity-0 transition-all duration-150",
                           )}
                         >
                           {item.winningNumber.padStart(5, "0")}
@@ -737,7 +737,7 @@ export default function AudienceDeluxeV1() {
                   .filter(
                     (item) =>
                       item.numb.toString().padStart(5, "0") ==
-                      selectedNumberResult
+                      selectedNumberResult,
                   )
                   .map((winner, idx) => (
                     <motion.div
