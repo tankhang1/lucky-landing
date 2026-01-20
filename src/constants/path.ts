@@ -4,7 +4,8 @@ const PATH = {
     CHECK_TOKEN: "/check-token-expired",
   },
   CAMPAIGN: {
-    GET_LIST: "/collect/campaign/luckydraw-available/list",
+    // GET_LIST: "/collect/campaign/luckydraw-available/list",
+    GET_LIST: "/zalo/campaign/search",
     GET_LIST_CUSTOMER: "/collect/consumer/list",
     GET_LIST_GIFT: "/zalo/campaign/gift/list",
     GET_DETAIL_NUMBER: "/zalo/campaign/detail/number",
