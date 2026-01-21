@@ -433,8 +433,9 @@ export default function AudienceDeluxeV1() {
               <div className="relative">
                 <img src={CrownIcon} className="w-14" />
               </div>
-              <div className="text-xl lg:text-2xl xl:text-3xl font-bold text-[#0F392B]">
-                Người trúng giải gần nhất
+              <div className="text-xl lg:text-2xl xl:text-3xl font-bold text-[#0F392B] flex flex-col md:flex-row md:gap-1">
+                <div>Người trúng giải </div>
+                <div>gần nhất</div>
               </div>
               <button
                 onClick={toggleFullScreen}
@@ -506,8 +507,9 @@ export default function AudienceDeluxeV1() {
               <div className="relative">
                 <img src={CrownIcon} className="w-14" />
               </div>
-              <div className="text-xl lg:text-2xl xl:text-3xl font-bold text-[#0F392B]">
-                Người trúng giải gần nhất
+              <div className="text-xl lg:text-2xl xl:text-3xl font-bold text-[#0F392B] flex flex-col md:flex-row md:gap-1">
+                <div>Người trúng giải </div>
+                <div>gần nhất</div>
               </div>
               <button
                 onClick={toggleFullScreen}
