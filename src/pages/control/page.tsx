@@ -55,7 +55,7 @@ function CagePreview({
 }) {
   const digits = useMemo(
     () => Array.from({ length: count }, (_, i) => value[i] ?? "–"),
-    [value]
+    [value],
   );
   return (
     <div className="rounded-xl border bg-neutral-50/60 p-3">
@@ -228,7 +228,7 @@ export default function ControlPage() {
             onError: () => {
               alert("Nhập số thất bại");
             },
-          }
+          },
         );
       }
     } else {
@@ -256,7 +256,7 @@ export default function ControlPage() {
             onError: () => {
               alert("Nhập số thất bại");
             },
-          }
+          },
         );
       }
     }
@@ -331,7 +331,7 @@ export default function ControlPage() {
               alert("Đã hết phiên đăng nhập, vui lòng đăng nhập lại");
             }
           },
-        }
+        },
       );
     } else {
       localStorage.clear();
@@ -404,7 +404,7 @@ export default function ControlPage() {
                       <div className="flex items-center gap-2">
                         {Array.from(
                           { length: digitCount },
-                          (_, i) => cage[i] ?? "–"
+                          (_, i) => cage[i] ?? "–",
                         ).map((d, i) => {
                           const active = d !== "–";
                           return (
@@ -535,7 +535,7 @@ export default function ControlPage() {
                             <span className="font-semibold">
                               {gifts?.reduce(
                                 (pre, cur) => pre + cur.limits,
-                                0
+                                0,
                               ) || 0}
                             </span>
                           </div>
@@ -707,9 +707,7 @@ export default function ControlPage() {
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
                                 onClick={handleShowCage}
-                                disabled={
-                                  isLoadingRequest || program?.status !== 1
-                                }
+                                disabled={isLoadingRequest}
                               >
                                 {isLoadingRequest ? "Đang xử lí..." : "Chọn số"}
                               </Button>
@@ -717,7 +715,6 @@ export default function ControlPage() {
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
                                 onClick={handPublishEvent}
-                                disabled={program?.status !== 1}
                               >
                                 Hiển thị
                               </Button>
@@ -813,10 +810,7 @@ export default function ControlPage() {
                                 size="sm"
                                 className="h-9 rounded-lg px-4"
                                 onClick={handleShowCage}
-                                disabled={
-                                  isLoadingRequestRandom ||
-                                  program?.status !== 1
-                                }
+                                disabled={isLoadingRequestRandom}
                               >
                                 {isLoadingRequestRandom
                                   ? "Đang xử lí..."
@@ -827,10 +821,9 @@ export default function ControlPage() {
                                 className="h-9 rounded-lg px-4"
                                 onClick={() =>
                                   handleRandomPublishEvent(
-                                    luckyRandom?.data?.[0]
+                                    luckyRandom?.data?.[0],
                                   )
                                 }
-                                disabled={program?.status !== 1}
                               >
                                 Hiển thị
                               </Button>

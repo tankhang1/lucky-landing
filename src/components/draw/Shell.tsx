@@ -22,7 +22,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const setProgramId = useDrawStore((s) => s.setProgramId);
   const setProgram = useDrawStore((s) => s.setProgram);
   const [selectedProgram, setSelectedProgram] = useState<TCampaign | null>(
-    null
+    null,
   );
   const themeKey = (programs?.find((p) => p.id === programId)?.status ??
     1) as keyof typeof THEMES;
@@ -50,7 +50,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               onValueChange={(value) => {
                 setProgramId(+value);
                 setSelectedProgram(
-                  programs?.find((item) => item.id.toString() == value) || null
+                  programs?.find((item) => item.id.toString() == value) || null,
                 );
               }}
             >
@@ -67,7 +67,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                 {programs?.map((p) => (
                   <SelectItem key={p.id} value={p.id.toString()}>
                     <div className="flex items-center gap-2">
-                      <Badge
+                      {/* <Badge
                         variant={
                           p.status === 1
                             ? "default"
@@ -81,7 +81,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                           : p.status === 2
                           ? "Kết thúc"
                           : "Sắp diễn ra"}
-                      </Badge>
+                      </Badge> */}
                       <span>{p.name}</span>
                       <Badge variant="outline">
                         {p?.type === 0 ? "Lồng cầu" : "Online"}

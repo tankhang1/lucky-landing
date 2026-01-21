@@ -33,15 +33,15 @@ export default function ProgramInfo({
                 program.status === 1
                   ? "default"
                   : program.status === 2
-                  ? "outline"
-                  : "secondary"
+                    ? "outline"
+                    : "secondary"
               }
             >
               {program.status === 1
                 ? "Đang diễn ra"
                 : program.status === 2
-                ? "Kết thúc"
-                : "Sắp diễn ra"}
+                  ? "Kết thúc"
+                  : "Sắp diễn ra"}
             </Badge>
             <Badge variant="outline">{program.code}</Badge>
             <Badge>{program.type === 0 ? "Lồng cầu" : "Online"}</Badge>
