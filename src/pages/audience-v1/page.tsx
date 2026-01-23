@@ -21,6 +21,7 @@ import { THEMES } from "@/lib/type";
 import { cn } from "@/lib/utils";
 import { useParams } from "react-router-dom";
 import {
+  useGetListCampaign,
   useGetListGiftCampaign,
   useGetListLuckyHistory,
   useRequestLuckyRandom,
@@ -62,6 +63,8 @@ type SpinResult = {
 };
 export default function AudienceDeluxeV1() {
   const { campaign_code, type } = useParams();
+  const { data: programs } = useGetListCampaign();
+  const program = programs?.find((p) => p.code === campaign_code);
   const stompClientRef = useRef<any>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [receivedEvent, setReceivedEvent] = useState<TReceiveEvent | null>(
@@ -343,7 +346,12 @@ export default function AudienceDeluxeV1() {
       </div>
       {type == "1" ? (
         <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-stretch">
-          <img src={Logo} className="xl:w-96 w-72 absolute top-0" />
+          <img src={Logo} className="xl:w-72 w-40 absolute top-0" />
+          {program?.name && (
+            <div className="absolute top-4 xl:top-10 left-1/2 -translate-x-1/2 text-lg md:text-2xl lg:text-4xl font-bold text-[#0F392B] uppercase text-center">
+              {program?.name || ""}
+            </div>
+          )}
 
           <div
             className={`w-[50%] lg:w-[55%] flex flex-col items-center justify-center gap-0 ${
@@ -428,7 +436,7 @@ export default function AudienceDeluxeV1() {
           </div> */}
           </div>
 
-          <div className="w-[45%] flex flex-col gap-3">
+          <div className="w-[45%] flex flex-col gap-3 mt-15">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img src={CrownIcon} className="w-14" />
@@ -451,7 +459,7 @@ export default function AudienceDeluxeV1() {
             </div>
 
             <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
-              <div ref={tableWrapRef} className="max-h-[68vh] overflow-auto">
+              <div ref={tableWrapRef} className="max-h-[63vh] overflow-auto">
                 <table className="w-full text-xs xl:text-sm">
                   <thead className="sticky top-0 bg-[#428C57]">
                     <tr className="lg:text-lg text-white">
@@ -500,9 +508,14 @@ export default function AudienceDeluxeV1() {
         </div>
       ) : (
         <div className="relative h-full px-6 md:px-10 py-8 flex gap-8 items-center ">
-          <img src={Logo} className="xl:w-96 w-72 absolute top-0" />
+          <img src={Logo} className="xl:w-72 w-40 absolute top-0" />
+          {program?.name && (
+            <div className="absolute top-4 xl:top-10 left-1/2 -translate-x-1/2 text-lg md:text-2xl lg:text-4xl font-bold text-[#0F392B] uppercase text-center">
+              {program?.name || ""}
+            </div>
+          )}
 
-          <div className="w-full lg:w-[50%] flex flex-col items-center justify-center gap-0 ">
+          <div className="w-[50%] flex flex-col items-center justify-center gap-0 ">
             <div className="flex items-center gap-3 w-full">
               <div className="relative">
                 <img src={CrownIcon} className="w-14" />
@@ -545,7 +558,7 @@ export default function AudienceDeluxeV1() {
             >
               <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/40" />
               {listWinners?.[0] ? (
-                <div className="grid xl:grid-cols-[300px_1fr] grid-cols-[150px_1fr] gap-4 items-center">
+                <div className="grid xl:grid-cols-[300px_1fr] grid-cols-[100px_1fr] gap-4 items-center">
                   <div>
                     {listWinners?.[0]?.gift_image ? (
                       <img
@@ -586,13 +599,12 @@ export default function AudienceDeluxeV1() {
               )}
             </motion.div>
           </div>
-
-          <div className="w-full lg:w-[50%] flex flex-col gap-6">
+          <div className="w-[50%] flex flex-col gap-6">
             <WinnersTicker items={listWinners} dot={THEMES[1].dot} />
 
             <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
               <div ref={tableWrapRef} className="max-h-[53vh] overflow-auto">
-                <table className="w-full text-xs xl:text-sm">
+                <table className="w-full text-xs! xl:text-sm!">
                   <thead className="sticky top-0 bg-[#428C57]">
                     <tr className="lg:text-lg text-white">
                       <th className="text-center p-3 w-12">STT</th>
