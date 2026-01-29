@@ -94,18 +94,18 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <Link to="/control">
               <Button variant="secondary">Control</Button>
             </Link>
-            {selectedProgram && (
+            {/* {selectedProgram && (
               <Link
                 to={`/audience/${selectedProgram.code}/${selectedProgram.type}`}
               >
                 <Button>Audience</Button>
               </Link>
-            )}
+            )} */}
             {selectedProgram && (
               <Link
                 to={`/audience-v1/${selectedProgram.code}/${selectedProgram.type}`}
               >
-                <Button>Audience (V1)</Button>
+                <Button>Audience</Button>
               </Link>
             )}
           </div>
