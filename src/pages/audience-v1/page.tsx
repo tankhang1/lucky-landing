@@ -586,9 +586,9 @@ export default function AudienceDeluxeV1() {
                     </div>
                     <div className="text-neutral-500">Thời gian</div>
                     <div>
-                      {listWinners?.[0]?.time
-                        ? dayjs(new Date(listWinners[0].time)).format(
-                            "DD/MM/YYYY",
+                      {listWinners?.[0]?.award_time
+                        ? dayjs(new Date(listWinners[0].award_time)).format(
+                            "DD/MM/YYYY - HH:mm",
                           )
                         : ""}
                     </div>
