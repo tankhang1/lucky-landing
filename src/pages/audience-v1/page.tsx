@@ -174,6 +174,10 @@ export default function AudienceDeluxeV1() {
                   queryClient.invalidateQueries({
                     queryKey: [QUERY_KEY.CAMPAGIN.LIST_LUCKY_HISTORY],
                   });
+                  if (parsedData?.message) {
+                    console.log(parsedData?.message);
+                    setAlertMessage(parsedData?.message);
+                  }
                 }
                 setReceivedEvent(parsedData);
               } catch (e) {

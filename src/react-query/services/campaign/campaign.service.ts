@@ -50,7 +50,7 @@ export type TGetCampaignDetailNumberReq = {
   c: string;
 };
 export const getCampaignDetailNumber = async (
-  params: TGetCampaignDetailNumberReq
+  params: TGetCampaignDetailNumberReq,
 ): Promise<TGetCampaignDetailNumberRes> => {
   const { data } = await api.get(PATH.CAMPAIGN.GET_DETAIL_NUMBER, {
     params,
@@ -74,7 +74,7 @@ export type TGetListCustomerCampaignReq = {
   campaignCode: string;
 };
 export const getListCustomerCampaign = async (
-  params: TGetListCustomerCampaignReq
+  params: TGetListCustomerCampaignReq,
 ): Promise<TGetListCustomerCampaignRes> => {
   const { data } = await api.get(PATH.CAMPAIGN.GET_LIST_CUSTOMER, {
     params,
@@ -104,7 +104,7 @@ export type TGetListGiftCampaignReq = {
 };
 export type TGetListGiftCampaignRes = TCampaignGift[];
 export const getListGiftCampaign = async (
-  params: TGetListGiftCampaignReq
+  params: TGetListGiftCampaignReq,
 ): Promise<TGetListGiftCampaignRes> => {
   const { data } = await api.get(PATH.CAMPAIGN.GET_LIST_GIFT, {
     params,
@@ -141,7 +141,7 @@ export type TRequestLuckyManualRes = {
   data: TLucky[];
 };
 export const requestLuckyManual = async (
-  body: TRequestLuckyManualReq
+  body: TRequestLuckyManualReq,
 ): Promise<TRequestLuckyManualRes> => {
   const { data } = await api.post(PATH.CAMPAIGN.REQUEST_LUCKY_MANUAL, body);
   return data;
@@ -157,7 +157,7 @@ export type TRequestLuckyRandomRes = {
   message: string;
 };
 export const requestLuckyRandom = async (
-  body: TRequestLuckyRandomReq
+  body: TRequestLuckyRandomReq,
 ): Promise<TRequestLuckyRandomRes> => {
   const { data } = await api.post(PATH.CAMPAIGN.REQUEST_LUCKY_RANDOM, body);
   return data;
@@ -179,7 +179,7 @@ export type TGetListCampaignLuckyHistoryReq = {
 };
 export type TGetListCampaignLuckyHistoryRes = TCampaignLuckyHistory[];
 export const getListCampaignLuckyHistory = async (
-  params: TGetListCampaignLuckyHistoryReq
+  params: TGetListCampaignLuckyHistoryReq,
 ): Promise<TGetListCampaignLuckyHistoryRes> => {
   const { data } = await api.get(PATH.CAMPAIGN.GET_LUCKY_HISTORY, {
     params,
@@ -199,10 +199,11 @@ export type TReceiveEvent = {
   award_name: string;
   type: string;
   list?: TLucky[];
+  message?: string;
 };
 
 export const requestPublishEvent = async (
-  params: TPublishEventReq
+  params: TPublishEventReq,
 ): Promise<void> => {
   const { data } = await api.get(PATH.CAMPAIGN.PUBLISH_EVENT, {
     params,

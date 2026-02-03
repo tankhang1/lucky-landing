@@ -225,8 +225,18 @@ export default function ControlPage() {
               //@ts-expect-error no check
               alert(res?.message);
             },
-            onError: () => {
-              alert("Nhập số thất bại");
+            onError: (error) => {
+              console.log(error);
+              //@ts-expect-error no check
+              alert(error?.response?.data?.message);
+              //@ts-expect-error no check
+              if (error.response?.data?.status === -41)
+                requestPublishEvent({
+                  type: program.type,
+                  data: JSON.stringify({
+                    message: `Mã số may mắn ${cage} không hợp lệ do đã trúng giải trong khuôn khổ chương trình hoặc không thuộc danh sách mã số tham gia chương trình.`,
+                  }),
+                });
             },
           },
         );
@@ -253,8 +263,10 @@ export default function ControlPage() {
               });
               setRandomMessage(res.message);
             },
-            onError: () => {
-              alert("Nhập số thất bại");
+            onError: (error) => {
+              console.log(error);
+              //@ts-expect-error no check
+              alert(error?.response?.data?.message);
             },
           },
         );
