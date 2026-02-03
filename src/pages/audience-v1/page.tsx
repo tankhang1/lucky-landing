@@ -521,91 +521,19 @@ export default function AudienceDeluxeV1() {
             </div>
           )}
 
-          <div className="w-[50%] flex flex-col items-center justify-center gap-0 ">
-            <div className="flex items-center gap-3 w-full">
-              <div className="relative">
-                <img src={CrownIcon} className="w-14" />
-              </div>
-              <div className="text-xl lg:text-2xl xl:text-3xl font-bold text-[#0F392B] flex flex-col md:flex-row md:gap-1">
-                <div>Người trúng giải </div>
-                <div>gần nhất</div>
-              </div>
-              <button
-                onClick={toggleFullScreen}
-                className="absolute top-4 right-4 z-50 p-2"
-                title={isFull ? "Exit Full Screen" : "Full Screen"}
-              >
-                {isFull ? (
-                  <Minimize2 className="h-5 w-5 text-neutral-700" />
-                ) : (
-                  <Maximize2 className="h-5 w-5 text-neutral-700" />
-                )}
-              </button>
+          <button
+            onClick={toggleFullScreen}
+            className="absolute top-4 right-4 z-50 p-2"
+            title={isFull ? "Exit Full Screen" : "Full Screen"}
+          >
+            {isFull ? (
+              <Minimize2 className="h-5 w-5 text-neutral-700" />
+            ) : (
+              <Maximize2 className="h-5 w-5 text-neutral-700" />
+            )}
+          </button>
 
-              {/* <button
-              onClick={() => navigate("/control")}
-              className="absolute top-4 left-4 z-50 p-2"
-              title={isFull ? "Exit Full Screen" : "Full Screen"}
-            >
-              <ArrowLeft />
-            </button> */}
-            </div>
-            <motion.div
-              animate={
-                flash
-                  ? { scale: 1.02, boxShadow: "0 0 0 0 rgba(245, 158, 11, 0)" }
-                  : { scale: 1 }
-              }
-              transition={{ type: "spring", stiffness: 240, damping: 18 }}
-              className={cn(
-                "w-full relative rounded-2xl border bg-white/70 backdrop-blur p-6",
-                "shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)]",
-              )}
-            >
-              <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/40" />
-              {listWinners?.[0] ? (
-                <div className="grid xl:grid-cols-[300px_1fr] grid-cols-[100px_1fr] gap-4 items-center">
-                  <div>
-                    {listWinners?.[0]?.gift_image ? (
-                      <img
-                        src={`${
-                          listWinners?.[0]?.gift_image
-                        }?t=${new Date().getTime()}`}
-                        className="xl:w-64 w-auto h-auto object-contain"
-                      />
-                    ) : (
-                      <div className="h-44 w-44 rounded-xl bg-neutral-100" />
-                    )}
-                  </div>
-                  <div className="grid xl:grid-cols-[100px_1fr] grid-cols-2 gap-3 text-sm md:text-base">
-                    <div className="text-neutral-500">Giải</div>
-                    <div className="font-semibold">
-                      {listWinners?.[0]?.award_name}
-                    </div>
-                    <div className="text-neutral-500">Tên</div>
-                    <div className="font-semibold">
-                      {listWinners?.[0]?.consumer_name ?? "—"}
-                    </div>
-                    <div className="text-neutral-500">SĐT</div>
-                    <div className="font-mono">
-                      {listWinners?.[0]?.consumer_phone?.slice(0, -3) + "***"}
-                    </div>
-                    <div className="text-neutral-500">Thời gian</div>
-                    <div>
-                      {listWinners?.[0]?.award_time
-                        ? dayjs(new Date(listWinners[0].award_time)).format(
-                            "DD/MM/YYYY - HH:mm",
-                          )
-                        : ""}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-neutral-500">Chưa có kết quả</div>
-              )}
-            </motion.div>
-          </div>
-          <div className="w-[50%] flex flex-col gap-2">
+          <div className="w-4/5 flex flex-col justify-center mx-auto gap-2">
             <WinnersTicker items={listWinners} dot={THEMES[1].dot} />
             <div className="text-xl lg:text-2xl xl:text-3xl font-bold text-[#0F392B] flex flex-col md:flex-row md:gap-1">
               DANH SÁCH TRÚNG THƯỞNG
@@ -624,26 +552,31 @@ export default function AudienceDeluxeV1() {
                     </tr>
                   </thead>
                   <tbody className="text-sm xl:text-lg">
-                    {listWinners?.map((w, idx) => (
-                      <tr
-                        key={idx}
-                        ref={idx === 0 ? firstRowRef : undefined}
-                        className="border-t"
-                      >
-                        <td className="p-3 text-center">{idx + 1}</td>
-                        <td className="p-3 text-center">{w.number}</td>
-                        <td className="p-3 font-medium text-center">
-                          {w.award_name}
-                        </td>
-                        {/* <td className="p-3 text-center">{w.gift_name}</td> */}
-                        <td className="p-3 text-center">
-                          {w.consumer_name ?? "—"}
-                        </td>
-                        <td className="p-3 text-center">
-                          {w.consumer_phone?.slice(0, -3) + "***"}
-                        </td>
-                      </tr>
-                    ))}
+                    {listWinners?.map((w, idx) => {
+                      const isHighlighted =
+                        receivedEvent?.numb &&
+                        Number(w.number) === Number(receivedEvent.numb);
+                      return (
+                        <tr
+                          key={idx}
+                          ref={idx === 0 ? firstRowRef : undefined}
+                          className={cn("border-t", {
+                            "text-[#DE784E] font-bold": isHighlighted,
+                          })}
+                        >
+                          <td className="p-3 text-center">{idx + 1}</td>
+                          <td className="p-3 text-center">{w.number}</td>
+                          <td className="p-3 text-center">{w.award_name}</td>
+                          {/* <td className="p-3 text-center">{w.gift_name}</td> */}
+                          <td className="p-3 text-center">
+                            {w.consumer_name ?? "—"}
+                          </td>
+                          <td className="p-3 text-center">
+                            {w.consumer_phone?.slice(0, -3) + "***"}
+                          </td>
+                        </tr>
+                      );
+                    })}
                     {!listWinners?.length && (
                       <tr>
                         <td
