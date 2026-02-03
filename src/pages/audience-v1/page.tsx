@@ -603,9 +603,11 @@ export default function AudienceDeluxeV1() {
               )}
             </motion.div>
           </div>
-          <div className="w-[50%] flex flex-col gap-6">
+          <div className="w-[50%] flex flex-col gap-2">
             <WinnersTicker items={listWinners} dot={THEMES[1].dot} />
-
+            <div className="text-xl lg:text-2xl xl:text-3xl font-bold text-[#0F392B] flex flex-col md:flex-row md:gap-1">
+              DANH SÁCH TRÚNG THƯỞNG
+            </div>
             <div className="rounded-2xl border overflow-hidden bg-white backdrop-blur shadow-md shadow-[#1E4D36]/40">
               <div ref={tableWrapRef} className="max-h-[53vh] overflow-auto">
                 <table className="w-full text-xs! xl:text-sm!">
