@@ -491,7 +491,9 @@ export default function AudienceDeluxeV1() {
                         <td className="p-3 text-center">
                           {w.consumer_name ?? "—"}
                         </td>
-                        <td className="p-3 text-center">{w.consumer_phone}</td>
+                        <td className="p-3 text-center">
+                          {w.consumer_phone?.slice(0, -3) + "***"}
+                        </td>
                       </tr>
                     ))}
                     {!listWinners?.length && (
@@ -586,7 +588,7 @@ export default function AudienceDeluxeV1() {
                     </div>
                     <div className="text-neutral-500">SĐT</div>
                     <div className="font-mono">
-                      {listWinners?.[0]?.consumer_phone}
+                      {listWinners?.[0]?.consumer_phone?.slice(0, -3) + "***"}
                     </div>
                     <div className="text-neutral-500">Thời gian</div>
                     <div>
@@ -637,7 +639,9 @@ export default function AudienceDeluxeV1() {
                         <td className="p-3 text-center">
                           {w.consumer_name ?? "—"}
                         </td>
-                        <td className="p-3 text-center">{w.consumer_phone}</td>
+                        <td className="p-3 text-center">
+                          {w.consumer_phone?.slice(0, -3) + "***"}
+                        </td>
                       </tr>
                     ))}
                     {!listWinners?.length && (
@@ -790,7 +794,9 @@ export default function AudienceDeluxeV1() {
                             </span>
                           </div>
                           <span className="font-medium truncate">
-                            {winner.consumer_phone || "—"}
+                            {winner?.consumer_phone
+                              ? winner.consumer_phone.slice(0, -3) + "***"
+                              : "—"}
                           </span>
                         </div>
                       </div>

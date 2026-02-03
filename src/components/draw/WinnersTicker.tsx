@@ -33,7 +33,7 @@ export default function WinnersTicker({
               <PartyPopper className="w-4 h-4" />
             )}
             <span className="font-medium">{w.gift_name}</span> –{" "}
-            {w.consumer_name ?? "—"} ({w.consumer_phone})
+            {w.consumer_name ?? "—"} ({w.consumer_phone?.slice(0, -3) + "***"})
           </div>
         ))}
       </motion.div>
