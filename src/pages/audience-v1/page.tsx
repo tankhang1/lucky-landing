@@ -533,7 +533,7 @@ export default function AudienceDeluxeV1() {
             )}
           </button>
 
-          <div className="w-3/5 flex flex-col justify-center mx-auto gap-2">
+          <div className="w-[70%] flex flex-col justify-center mx-auto gap-2">
             <WinnersTicker items={listWinners} dot={THEMES[1].dot} />
             <div className="text-xl lg:text-2xl xl:text-3xl font-bold text-[#0F392B] flex flex-col md:flex-row md:gap-1">
               DANH SÁCH TRÚNG THƯỞNG
@@ -542,7 +542,7 @@ export default function AudienceDeluxeV1() {
               <div ref={tableWrapRef} className="max-h-[53vh] overflow-auto">
                 <table className="w-full text-xs! xl:text-sm!">
                   <thead className="sticky top-0 bg-[#428C57]">
-                    <tr className="lg:text-lg text-white">
+                    <tr className="lg:text-2xl text-white">
                       <th className="text-center p-3 w-12">STT</th>
                       <th className="text-center p-3">Số may mắn</th>
                       <th className="text-center p-3">Giải</th>
