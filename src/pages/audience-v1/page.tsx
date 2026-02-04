@@ -551,7 +551,7 @@ export default function AudienceDeluxeV1() {
                       <th className="text-center p-3">SĐT</th>
                     </tr>
                   </thead>
-                  <tbody className="text-sm xl:text-2xl">
+                  <tbody className="text-sm xl:text-3xl">
                     {listWinners?.map((w, idx) => {
                       const isHighlighted =
                         receivedEvent?.numb &&
@@ -560,7 +560,7 @@ export default function AudienceDeluxeV1() {
                         <tr
                           key={idx}
                           ref={idx === 0 ? firstRowRef : undefined}
-                          className={cn("border-t", {
+                          className={cn("border-t font-medium", {
                             "text-[#DE784E] font-bold": isHighlighted,
                           })}
                         >
