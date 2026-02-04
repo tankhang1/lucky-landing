@@ -533,7 +533,7 @@ export default function AudienceDeluxeV1() {
             )}
           </button>
 
-          <div className="w-4/5 flex flex-col justify-center mx-auto gap-2">
+          <div className="w-3/5 flex flex-col justify-center mx-auto gap-2">
             <WinnersTicker items={listWinners} dot={THEMES[1].dot} />
             <div className="text-xl lg:text-2xl xl:text-3xl font-bold text-[#0F392B] flex flex-col md:flex-row md:gap-1">
               DANH SÁCH TRÚNG THƯỞNG
@@ -551,7 +551,7 @@ export default function AudienceDeluxeV1() {
                       <th className="text-center p-3">SĐT</th>
                     </tr>
                   </thead>
-                  <tbody className="text-sm xl:text-lg">
+                  <tbody className="text-sm xl:text-2xl">
                     {listWinners?.map((w, idx) => {
                       const isHighlighted =
                         receivedEvent?.numb &&
