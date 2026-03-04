@@ -179,6 +179,10 @@ export default function AudienceDeluxeV1() {
                     setAlertMessage(parsedData?.message);
                   }
                 }
+                if (type === "1") {
+                  setIsSpinning(true);
+                  setDisplayNumber(parsedData.numb.toString().padStart(5, "0"));
+                }
                 setReceivedEvent(parsedData);
               } catch (e) {
                 console.error("Error parsing JSON", e);
@@ -266,7 +270,7 @@ export default function AudienceDeluxeV1() {
   };
   const onJackpotAnimationComplete = () => {
     // Chỉ xử lý khi đang trong trạng thái quay thật (tránh trigger lúc init)
-    if (!isSpinning || !pendingWinner) return;
+    // if (!isSpinning || !pendingWinner) return;
 
     // 2. Bắn pháo hoa
     setTimeout(() => {
@@ -277,7 +281,9 @@ export default function AudienceDeluxeV1() {
         zIndex: 9999,
       });
     }, 1000);
-
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEY.CAMPAGIN.LIST_LUCKY_HISTORY],
+    });
     // 4. Kết thúc trạng thái quay của lượt này
     setIsSpinning(false);
     handleNextLoop();
