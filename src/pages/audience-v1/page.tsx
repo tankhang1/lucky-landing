@@ -397,7 +397,7 @@ export default function AudienceDeluxeV1() {
               <div className="flex justify-center items-center gap-2">
                 <Select value={giftCode} onValueChange={setGiftCode}>
                   <SelectTrigger
-                    className={`${selectTriggerClass} w-auto max-w-[420px]`}
+                    className={`${selectTriggerClass} w-auto xl:max-w-[420px] lg:max-w-[280px] md:max-w-[150px]`}
                   >
                     <div className="flex-1 min-w-0 flex justify-center items-center px-1 gap-2">
                       <span className="truncate text-base lg:text-lg flex-1">
