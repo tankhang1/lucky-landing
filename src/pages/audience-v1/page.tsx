@@ -285,6 +285,8 @@ export default function AudienceDeluxeV1() {
       });
       // 4. Kết thúc trạng thái quay của lượt này
       setIsSpinning(false);
+      handleNextLoop();
+
       return;
     }
     if (!isSpinning || !pendingWinner) return;
